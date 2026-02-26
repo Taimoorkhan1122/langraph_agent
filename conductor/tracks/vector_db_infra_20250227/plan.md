@@ -20,7 +20,7 @@
     - [x] Implement script or NestJS module that creates schema on startup/run; document how to run (e.g. pnpm run schema:create or app bootstrap).
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Multi-Tenant Schema' (Protocol in workflow.md)
 
-## Phase 3: Sample Data and Verification
+## Phase 3: Sample Data and Verification [checkpoint: c7d0765]
 
 - [x] Task: Create tenant and insert sample document entries (US-003) 8744270
     - [x] Write tests for data insertion: mock Weaviate client, assert tenant creation and insert of ≥3 objects with fileId, question, answer, pageNumber.
@@ -28,4 +28,4 @@
 - [x] Task: Verify data retrieval 8744270
     - [x] Write tests that query Weaviate (or mocked client) and assert sample entries are present and have required fields and vectors.
     - [x] Implement verification step (e.g. script or test that runs against local Weaviate); document in README.
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Sample Data and Verification' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Sample Data and Verification' (Protocol in workflow.md)
