@@ -33,6 +33,12 @@ This document describes the **existing** technology stack for the LangGraph Hier
 > packages installed as part of EPIC-002 Delegating Agent track. `ChatGoogleGenerativeAI`
 > is the active LLM provider; model and API key are injected via `GEMINI_MODEL` and
 > `GEMINI_API_KEY` environment variables.
+>
+> **LangChain v1+ & Agent Patterns (2026-02-27):**
+> - Following LangChain 1.x and LangGraph best practices for agent workflows
+> - All agents use Runnable interface, tool binding, and StateGraph for composition
+> - Official documentation sourced via LangChain MCP (`#sym:docs-langchain`) or Context7
+> - Streaming responses and proper error boundaries implemented per v1+ standards
 
 ## Infrastructure & Tooling
 

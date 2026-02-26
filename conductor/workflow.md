@@ -136,7 +136,33 @@ Before marking any task complete, verify:
 - [ ] Documentation updated if needed
 - [ ] No security vulnerabilities introduced
 
+## LangChain & Agent Development Patterns
+
+### Documentation Resources
+
+**For all LangChain and LangGraph documentation:**
+- **Primary:** Use the [official LangChain Documentation MCP](#sym:docs-langchain) for real-time docs
+- **Fallback:** Use Context7 library reference for alternative documentation search
+- **DO NOT** rely on external tutorials or blogs without verifying against official docs
+
+### LangChain v1+ & LangGraph Patterns
+
+This project follows **LangChain 1.x** and **LangGraph** best practices:
+
+1. **Runnable Interface:** All agent components (prompts, models, tools) must implement or extend the `Runnable` interface
+2. **Tool Binding:** Use `model.bindTools()` for structured tool integration instead of legacy function calling
+3. **LangGraph State:** Define state graphs using `StateGraph` for explicit workflow control
+4. **Streaming:** Leverage `stream()` and async iterators for real-time feedback
+5. **Composition:** Use `|` (pipe operator) to compose runnables for clean, declarative chains
+6. **Error Handling:** Implement proper error boundaries using LangChain's structured error types
+
+**Resources for patterns:**
+- LangChain v1 Guide: Consult the official documentation MCP for latest patterns
+- LangGraph StateGraph: Standard pattern for multi-agent hierarchies
+- Tool Definition: Use `@tool` decorator or `StructuredTool` class
+
 ## Development Commands
+
 
 ### Setup
 ```bash
