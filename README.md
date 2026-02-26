@@ -43,6 +43,14 @@ $ docker compose up -d
 - **Health check:** `curl http://localhost:8080/v1/.well-known/ready` (expect HTTP 200)
 - **Environment:** `AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED=true`, `PERSISTENCE_DATA_PATH=/var/lib/weaviate`. Data is stored in the `weaviate_data` volume.
 
+After Weaviate is running, create the multi-tenant Document schema (US-002):
+
+```bash
+$ pnpm run schema:create
+```
+
+Optional: set `WEAVIATE_URL` (default `http://localhost:8080`) if Weaviate is elsewhere.
+
 ## Compile and run the project
 
 ```bash
