@@ -50,7 +50,9 @@ async function ensureTenant(baseUrl: string, tenantName: string): Promise<void> 
   const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify([{ name: tenantName }]),
+    body: JSON.stringify([
+      { name: tenantName, activityStatus: 'ACTIVE' },
+    ]),
   });
 
   if (res.ok) return;
@@ -69,12 +71,13 @@ async function insertOne(
   tenant: string,
   entry: DocumentEntry,
 ): Promise<void> {
-  const url = `${baseUrl.replace(/\/$/, '')}/v1/objects?tenant=${encodeURIComponent(tenant)}`;
+  const url = `${baseUrl.replace(/\/$/, '')}/v1/objects`;
   const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       class: DOCUMENT_COLLECTION_NAME,
+      tenant,
       properties: {
         fileId: entry.fileId,
         question: entry.question,
