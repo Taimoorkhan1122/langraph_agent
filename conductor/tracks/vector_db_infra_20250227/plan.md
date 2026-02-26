@@ -10,7 +10,7 @@
     - [x] Add README section with `docker-compose up` and health check command (curl localhost:8080/v1/.well-known/ready); document env vars.
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Weaviate Docker and Health' (Protocol in workflow.md)
 
-## Phase 2: Multi-Tenant Schema [checkpoint: pending]
+## Phase 2: Multi-Tenant Schema [checkpoint: 1750eea]
 
 - [x] Task: Define Document collection schema (US-002) 12bb977
     - [x] Write tests for schema creation module: expect Document class with multiTenancyConfig.enabled and fields fileId, question, answer, pageNumber with correct types and indexing.
