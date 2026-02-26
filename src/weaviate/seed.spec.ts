@@ -58,7 +58,7 @@ describe('Weaviate seed (US-003)', () => {
       );
       expect(objectCalls.length).toBe(SAMPLE_DOCUMENT_ENTRIES.length);
 
-      const firstBody = JSON.parse(objectCalls[0]!.body!);
+      const firstBody = JSON.parse(objectCalls[0].body!);
       expect(firstBody.class).toBe('Document');
       expect(firstBody.properties).toMatchObject({
         fileId: expect.any(String),

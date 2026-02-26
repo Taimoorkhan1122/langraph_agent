@@ -44,7 +44,11 @@ describe('Weaviate verify-seed (US-003)', () => {
           JSON.stringify({ objects: three.map((p) => ({ properties: p })) }),
         );
 
-      const ok = await verifySampleData('http://localhost:8080', 'sample-tenant', 3);
+      const ok = await verifySampleData(
+        'http://localhost:8080',
+        'sample-tenant',
+        3,
+      );
       expect(ok).toBe(true);
     });
 
@@ -52,7 +56,16 @@ describe('Weaviate verify-seed (US-003)', () => {
       global.fetch = async () =>
         new Response(
           JSON.stringify({
-            objects: [{ properties: { fileId: 'x', question: 'q', answer: 'a', pageNumber: [] } }],
+            objects: [
+              {
+                properties: {
+                  fileId: 'x',
+                  question: 'q',
+                  answer: 'a',
+                  pageNumber: [],
+                },
+              },
+            ],
           }),
         );
 

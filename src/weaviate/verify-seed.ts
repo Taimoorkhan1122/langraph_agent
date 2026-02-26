@@ -29,7 +29,9 @@ export async function fetchDocumentObjects(
     throw new Error(`Weaviate objects get failed (${res.status}): ${text}`);
   }
 
-  const json = (await res.json()) as { objects?: { properties?: DocumentObject }[] };
+  const json = (await res.json()) as {
+    objects?: { properties?: DocumentObject }[];
+  };
   const objects = json?.objects ?? [];
   return objects.map((o) => o.properties ?? {});
 }
@@ -56,9 +58,7 @@ export async function verifySampleData(
     const props = objects[i];
     for (const key of required) {
       if (!(key in props)) {
-        throw new Error(
-          `Object ${i} missing required field "${key}"`,
-        );
+        throw new Error(`Object ${i} missing required field "${key}"`);
       }
     }
     if (!Array.isArray(props.pageNumber)) {

@@ -77,9 +77,9 @@ describe('Weaviate Document schema (US-002)', () => {
           status: 400,
         });
 
-      await expect(createDocumentSchema('http://localhost:8080')).rejects.toThrow(
-        /Weaviate schema create failed \(400\)/,
-      );
+      await expect(
+        createDocumentSchema('http://localhost:8080'),
+      ).rejects.toThrow(/Weaviate schema create failed \(400\)/);
     });
   });
 });

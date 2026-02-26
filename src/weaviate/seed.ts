@@ -28,15 +28,13 @@ export const SAMPLE_DOCUMENT_ENTRIES: DocumentEntry[] = [
   {
     fileId: 'doc-002',
     question: 'How do I reset my password?',
-    answer:
-      'To reset your password, click on the "Forgot Password" link...',
+    answer: 'To reset your password, click on the "Forgot Password" link...',
     pageNumber: ['12'],
   },
   {
     fileId: 'doc-003',
     question: 'What are the API rate limits?',
-    answer:
-      'The API allows 1000 requests per minute per tenant...',
+    answer: 'The API allows 1000 requests per minute per tenant...',
     pageNumber: ['3', '4', '8'],
   },
 ];
@@ -45,14 +43,15 @@ export const SAMPLE_DOCUMENT_ENTRIES: DocumentEntry[] = [
  * Ensures the tenant exists by adding it to the Document class (REST).
  * Idempotent: 422 "already exists" is treated as success.
  */
-async function ensureTenant(baseUrl: string, tenantName: string): Promise<void> {
+async function ensureTenant(
+  baseUrl: string,
+  tenantName: string,
+): Promise<void> {
   const url = `${baseUrl.replace(/\/$/, '')}/v1/schema/${DOCUMENT_COLLECTION_NAME}/tenants`;
   const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify([
-      { name: tenantName, activityStatus: 'ACTIVE' },
-    ]),
+    body: JSON.stringify([{ name: tenantName, activityStatus: 'ACTIVE' }]),
   });
 
   if (res.ok) return;
