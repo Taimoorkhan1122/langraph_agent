@@ -5,9 +5,9 @@
 - [x] Task: Add Docker Compose for Weaviate (US-001) f900bcc
     - [x] Write tests that assert docker-compose config exists and Weaviate service is defined (e.g. script or test that parses/validates compose file).
     - [x] Add docker-compose.yml with Weaviate service (image version, ports 8080, env vars, volumes); document in README.
-- [ ] Task: Verify Weaviate health and accessibility
-    - [ ] Write tests for health check (e.g. HTTP GET to health endpoint when Weaviate URL is provided; can be skipped if Weaviate not running).
-    - [ ] Add README section with `docker-compose up` and health check command (curl localhost:8080/v1/.well-known/ready); document env vars.
+- [x] Task: Verify Weaviate health and accessibility 913bdd7
+    - [x] Write tests for health check (e.g. HTTP GET to health endpoint when Weaviate URL is provided; can be skipped if Weaviate not running).
+    - [x] Add README section with `docker-compose up` and health check command (curl localhost:8080/v1/.well-known/ready); document env vars.
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Weaviate Docker and Health' (Protocol in workflow.md)
 
 ## Phase 2: Multi-Tenant Schema
