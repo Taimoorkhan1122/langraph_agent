@@ -10,15 +10,15 @@
     - [x] Add README section with `docker-compose up` and health check command (curl localhost:8080/v1/.well-known/ready); document env vars.
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Weaviate Docker and Health' (Protocol in workflow.md)
 
-## Phase 2: Multi-Tenant Schema
+## Phase 2: Multi-Tenant Schema [checkpoint: pending]
 
-- [ ] Task: Define Document collection schema (US-002)
-    - [ ] Write tests for schema creation module: expect Document class with multiTenancyConfig.enabled and fields fileId, question, answer, pageNumber with correct types and indexing.
-    - [ ] Implement schema creation using Weaviate JS client (create class Document, multi-tenancy enabled, fields per spec); include error handling and validation.
-- [ ] Task: Expose schema creation in app or script
-    - [ ] Write tests for invocation (e.g. script or NestJS service that creates schema; test can mock client).
-    - [ ] Implement script or NestJS module that creates schema on startup/run; document how to run (e.g. pnpm run schema:create or app bootstrap).
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Multi-Tenant Schema' (Protocol in workflow.md)
+- [x] Task: Define Document collection schema (US-002) 12bb977
+    - [x] Write tests for schema creation module: expect Document class with multiTenancyConfig.enabled and fields fileId, question, answer, pageNumber with correct types and indexing.
+    - [x] Implement schema creation using Weaviate JS client (create class Document, multi-tenancy enabled, fields per spec); include error handling and validation.
+- [x] Task: Expose schema creation in app or script 12bb977
+    - [x] Write tests for invocation (e.g. script or NestJS service that creates schema; test can mock client).
+    - [x] Implement script or NestJS module that creates schema on startup/run; document how to run (e.g. pnpm run schema:create or app bootstrap).
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Multi-Tenant Schema' (Protocol in workflow.md)
 
 ## Phase 3: Sample Data and Verification
 
