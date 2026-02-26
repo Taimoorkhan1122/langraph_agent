@@ -51,6 +51,14 @@ $ pnpm run schema:create
 
 Optional: set `WEAVIATE_URL` (default `http://localhost:8080`) if Weaviate is elsewhere.
 
+Seed sample document entries (US-003) into the `sample-tenant` tenant:
+
+```bash
+$ pnpm run seed
+```
+
+This creates the tenant, inserts three sample document entries (doc-001, doc-002, doc-003), and verifies they are retrievable.
+
 ## Compile and run the project
 
 ```bash
