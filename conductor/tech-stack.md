@@ -23,10 +23,16 @@ This document describes the **existing** technology stack for the LangGraph Hier
 |-----------|--------|---------|
 | Vector DB | Weaviate | Semantic search, vector storage, multi-tenancy |
 | Weaviate client | Weaviate JS Client | Official client for Weaviate from Node.js |
-| Agent framework | LangGraph | Agent hierarchy and workflow orchestration |
-| LLM abstraction | LangChain | LLM communication and tool integration |
-| LLM | Google Gemini / Local LLM | Reasoning and response generation |
+| Agent framework | LangGraph / LangChain | Agent hierarchy, workflow orchestration, and tool integration |
+| LangChain core | @langchain/core | Base runnables, prompts, output parsers |
+| LangChain Google | @langchain/google-genai | ChatGoogleGenerativeAI LLM adapter |
+| LLM | Google Gemini (gemini-1.5-flash) | Default model; configured via GEMINI_MODEL env var |
 | Chart tool | Chart.js (or equivalent) | Mock chart generation (per project docs) |
+
+> **Note (2026-02-27):** `@langchain/core`, `@langchain/google-genai`, and `langchain`
+> packages installed as part of EPIC-002 Delegating Agent track. `ChatGoogleGenerativeAI`
+> is the active LLM provider; model and API key are injected via `GEMINI_MODEL` and
+> `GEMINI_API_KEY` environment variables.
 
 ## Infrastructure & Tooling
 
