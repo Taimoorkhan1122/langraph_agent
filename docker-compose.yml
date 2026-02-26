@@ -1,0 +1,26 @@
+# Weaviate vector database for local development (EPIC-001 / US-001)
+# See https://docs.weaviate.io/weaviate/quickstart/local
+services:
+  weaviate:
+    image: cr.weaviate.io/semitechnologies/weaviate:1.36.0
+    command:
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8080"
+      - --scheme
+      - http
+    ports:
+      - "8080:8080"
+      - "50051:50051"
+    volumes:
+      - weaviate_data:/var/lib/weaviate
+    restart: on-failure:0
+    environment:
+      AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: "true"
+      PERSISTENCE_DATA_PATH: "/var/lib/weaviate"
+      QUERY_DEFAULTS_LIMIT: "25"
+      CLUSTER_HOSTNAME: "node1"
+
+volumes:
+  weaviate_data:
