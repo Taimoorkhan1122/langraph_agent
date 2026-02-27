@@ -97,4 +97,29 @@ describe('ChartToolService contracts', () => {
       expect(parsed.options.plugins.title.text).toBe(`${type} title`);
     },
   );
+
+  it('uses deterministic, type-specific labels and values for bar charts', () => {
+    const output = service.generateConfig({ type: 'bar', title: 'bar title' });
+    const parsed = JSON.parse(output) as {
+      data: { labels: string[]; datasets: Array<{ data: number[] }> };
+    };
+
+    expect(parsed.data.labels).toEqual(['Q1', 'Q2', 'Q3', 'Q4']);
+    expect(parsed.data.datasets[0].data).toEqual([42, 55, 38, 61]);
+  });
+
+  it('uses deterministic, type-specific labels and values for pie charts', () => {
+    const output = service.generateConfig({ type: 'pie', title: 'pie title' });
+    const parsed = JSON.parse(output) as {
+      data: { labels: string[]; datasets: Array<{ data: number[] }> };
+    };
+
+    expect(parsed.data.labels).toEqual([
+      'Product A',
+      'Product B',
+      'Product C',
+      'Product D',
+    ]);
+    expect(parsed.data.datasets[0].data).toEqual([28, 22, 30, 20]);
+  });
 });
