@@ -57,6 +57,16 @@ describe('ChartToolService contracts', () => {
     }
   });
 
+  it('throws a structured INVALID_CHART_INPUT error for malformed payload', () => {
+    expect(() =>
+      service.generateConfig({ type: 'bar', title: '   ' } as never),
+    ).toThrow(
+      expect.objectContaining({
+        code: 'INVALID_CHART_INPUT',
+      }),
+    );
+  });
+
   it('returns a serialized chart config JSON string', async () => {
     const output = await service.generateConfig({
       type: ChartType.enum.bar,

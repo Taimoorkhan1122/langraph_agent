@@ -224,6 +224,16 @@ describe('DelegatingAgentService.process() – stub chart config', () => {
     expect(typeof chart.options).toBe('object');
   });
 
+  it('uses chart-tool deterministic label profile for chart path', async () => {
+    const service = new DelegatingAgentService(
+      makeClassifier('chart'),
+      makeRagService().ragService,
+    );
+
+    const output = await service.process(input);
+    expect(output.chart?.data.labels).toEqual(['Q1', 'Q2', 'Q3', 'Q4']);
+  });
+
   it('returns a valid stub ChartResult for "hybrid" path', async () => {
     const service = new DelegatingAgentService(
       makeClassifier('hybrid'),
