@@ -16,7 +16,7 @@
     - [ ] Implement fallback to `fetchObjects` on capability/config failure
     - [ ] Ensure returned records include `fileId`, `question`, `answer`, `pageNumber`
     - [ ] Re-run targeted tests and confirm pass
-- [ ] Task: Refactor retrieval code and tests for clarity
+- [x] Task: Refactor retrieval code and tests for clarity (afde552)
     - [ ] Remove duplication and isolate query strategy decision logic
     - [ ] Improve mocks/fixtures for Weaviate client behavior
     - [ ] Re-run tests after refactor
