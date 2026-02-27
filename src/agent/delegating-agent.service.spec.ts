@@ -274,3 +274,93 @@ describe('DelegatingAgentService.process() – error handling', () => {
     expect(output.rag).toBeUndefined();
   });
 });
+
+describe('DelegatingAgentService.process() – streaming data compatibility', () => {
+  const input: ClassificationInput = {
+    query: 'refund policy',
+    tenantName: 'tenant-stream',
+  };
+
+  it('maps rag references into output.data items for rag path', async () => {
+    const ragResultWithRefs: RagResult = {
+      answer: 'Refund answer',
+      sources: [
+        {
+          fileId: 'doc-1',
+          question: 'q',
+          answer: 'a',
+          pageNumber: ['2'],
+        },
+      ],
+      references: [
+        {
+          type: 'rag',
+          fileId: 'doc-1',
+          index: 1,
+          pages: ['2'],
+        },
+      ],
+    };
+
+    const service = new DelegatingAgentService(
+      makeClassifier('rag'),
+      makeRagService(ragResultWithRefs),
+    );
+
+    const output = await service.process(input);
+
+    expect(output.data).toEqual([
+      {
+        type: 'rag',
+        fileId: 'doc-1',
+        index: 1,
+        pages: ['2'],
+      },
+    ]);
+  });
+
+  it('maps chart config into output.data for chart path', async () => {
+    const service = new DelegatingAgentService(
+      makeClassifier('chart'),
+      makeRagService(),
+    );
+
+    const output = await service.process(input);
+
+    expect(output.data).toHaveLength(1);
+    expect(output.data?.[0]).toMatchObject({ type: 'chart' });
+  });
+
+  it('combines rag references and chart config in output.data for hybrid path', async () => {
+    const ragResultWithRefs: RagResult = {
+      answer: 'Hybrid answer',
+      sources: [
+        {
+          fileId: 'doc-2',
+          question: 'q',
+          answer: 'a',
+          pageNumber: ['9'],
+        },
+      ],
+      references: [
+        {
+          type: 'rag',
+          fileId: 'doc-2',
+          index: 1,
+          pages: ['9'],
+        },
+      ],
+    };
+
+    const service = new DelegatingAgentService(
+      makeClassifier('hybrid'),
+      makeRagService(ragResultWithRefs),
+    );
+
+    const output = await service.process(input);
+
+    expect(output.data).toHaveLength(2);
+    expect(output.data?.[0]).toMatchObject({ type: 'rag', fileId: 'doc-2' });
+    expect(output.data?.[1]).toMatchObject({ type: 'chart' });
+  });
+});

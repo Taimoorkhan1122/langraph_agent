@@ -78,6 +78,20 @@ export class DelegatingAgentService {
       output.chart = state.chart;
     }
 
+    const data: NonNullable<ClassificationOutput['data']> = [];
+
+    if (state.rag?.references?.length) {
+      data.push(...state.rag.references);
+    }
+
+    if (state.chart !== undefined) {
+      data.push({ type: 'chart', config: state.chart });
+    }
+
+    if (data.length > 0) {
+      output.data = data;
+    }
+
     return output;
   }
 

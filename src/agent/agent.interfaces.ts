@@ -81,6 +81,16 @@ export interface ChartResult {
   options: Record<string, unknown>;
 }
 
+/** Streaming-compatible chart data payload. */
+export interface ChartDataReference {
+  type: 'chart';
+  config: ChartResult;
+  title?: string;
+}
+
+/** Heterogeneous data references for response streaming. */
+export type AgentDataReference = RagReference | ChartDataReference;
+
 /**
  * The final output of the DelegatingAgentService.
  * Always contains `label`; `rag` and `chart` are populated according to routing.
@@ -92,4 +102,6 @@ export interface ClassificationOutput {
   rag?: RagResult;
   /** Populated for `chart` and `hybrid` classifications. */
   chart?: ChartResult;
+  /** Streaming-compatible data references (rag refs and/or chart config). */
+  data?: AgentDataReference[];
 }
