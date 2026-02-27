@@ -19,14 +19,18 @@ export interface ChartToolError {
 
 @Injectable()
 export class ChartToolService {
-  private readonly labelsByType: Readonly<Record<z.infer<typeof ChartType>, string[]>> = {
+  private readonly labelsByType: Readonly<
+    Record<z.infer<typeof ChartType>, string[]>
+  > = {
     bar: ['Q1', 'Q2', 'Q3', 'Q4'],
     line: ['Jan', 'Feb', 'Mar', 'Apr'],
     pie: ['Product A', 'Product B', 'Product C', 'Product D'],
     doughnut: ['North', 'South', 'East', 'West'],
   };
 
-  private readonly dataByType: Readonly<Record<z.infer<typeof ChartType>, number[]>> = {
+  private readonly dataByType: Readonly<
+    Record<z.infer<typeof ChartType>, number[]>
+  > = {
     bar: [42, 55, 38, 61],
     line: [12, 19, 7, 15],
     pie: [28, 22, 30, 20],

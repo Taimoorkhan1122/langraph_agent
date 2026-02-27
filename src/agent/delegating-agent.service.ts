@@ -171,7 +171,10 @@ export class DelegatingAgentService {
 
       return { chart };
     } catch (err) {
-      this.logger.error('Chart tool failed; returning degraded chart result', err);
+      this.logger.error(
+        'Chart tool failed; returning degraded chart result',
+        err,
+      );
       return {
         errors: [
           {

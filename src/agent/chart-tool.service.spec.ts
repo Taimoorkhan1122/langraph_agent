@@ -58,17 +58,18 @@ describe('ChartToolService contracts', () => {
   });
 
   it('throws a structured INVALID_CHART_INPUT error for malformed payload', () => {
-    expect(() =>
-      service.generateConfig({ type: 'bar', title: '   ' } as never),
-    ).toThrow(
-      expect.objectContaining({
-        code: 'INVALID_CHART_INPUT',
-      }),
-    );
+    try {
+      service.generateConfig({ type: 'bar', title: '   ' } as never);
+      throw new Error('Expected generateConfig to throw for malformed payload');
+    } catch (error) {
+      expect(error).toBeInstanceOf(Error);
+      const chartError = error as Error & { code?: string };
+      expect(chartError.code).toBe('INVALID_CHART_INPUT');
+    }
   });
 
-  it('returns a serialized chart config JSON string', async () => {
-    const output = await service.generateConfig({
+  it('returns a serialized chart config JSON string', () => {
+    const output = service.generateConfig({
       type: ChartType.enum.bar,
       title: 'Quarterly Revenue',
     });
@@ -85,8 +86,8 @@ describe('ChartToolService contracts', () => {
 
   it.each(['bar', 'line', 'pie', 'doughnut'] as const)(
     'generates valid JSON config for %s chart type',
-    async (type) => {
-      const output = await service.generateConfig({
+    (type) => {
+      const output = service.generateConfig({
         type,
         title: `${type} title`,
       });
