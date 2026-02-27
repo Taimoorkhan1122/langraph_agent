@@ -5,7 +5,7 @@
     - [ ] Add/confirm TypeScript interfaces for RAG request, retrieval result, and error result
     - [ ] Define required tenant input contract and missing-tenant error shape
     - [ ] Document function-level API boundaries for retrieval and answer generation
-- [ ] Task: Write failing tests for tenant validation and retrieval orchestration (Red)
+- [x] Task: Write failing tests for tenant validation and retrieval orchestration (Red) (6e839bf)
     - [ ] Add unit tests for missing tenant id failure path
     - [ ] Add unit tests for semantic retrieval path selection
     - [ ] Add unit tests for semantic-to-fetch fallback behavior
