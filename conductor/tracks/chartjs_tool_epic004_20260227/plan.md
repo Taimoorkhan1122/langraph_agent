@@ -24,11 +24,11 @@
     - [ ] Implement deterministic label and dataset generation
     - [ ] Ensure output is serialized JSON string
     - [ ] Ensure config parseability and compatibility with Chart.js structure
-- [~] Task: Refactor implementation and tests safely
+- [x] Task: Refactor implementation and tests safely (5162afa)
     - [ ] Remove duplication in config builders
     - [ ] Preserve deterministic outputs and public behavior
     - [ ] Re-run tests to confirm pass state
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: TDD - Mock Configuration Generator' (Protocol in workflow.md)
+- [~] Task: Conductor - User Manual Verification 'Phase 2: TDD - Mock Configuration Generator' (Protocol in workflow.md)
 
 ## Phase 3: TDD - Validation, Registration & Quality Gates
 - [ ] Task: Write failing tests for invalid input and registration behavior (Red)
