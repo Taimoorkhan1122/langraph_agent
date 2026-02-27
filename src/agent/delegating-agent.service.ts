@@ -11,6 +11,7 @@ import {
   ClassificationLabel,
   ChartResult,
   AgentError,
+  AgentStreamChunk,
 } from './agent.interfaces';
 import { QueryClassifier } from './query-classifier';
 import { RagService } from './rag.service';
@@ -62,6 +63,25 @@ export class DelegatingAgentService {
     }
 
     return output;
+  }
+
+  async *processStream(
+    input: ClassificationInput,
+  ): AsyncIterable<AgentStreamChunk> {
+    const output = await this.process(input);
+    const finalAnswer = this.buildStreamAnswer(output, input);
+
+    yield {
+      answer: this.buildIntermediateAnswer(finalAnswer),
+      data: [],
+      isFinal: false,
+    };
+
+    yield {
+      answer: finalAnswer,
+      data: output.data ?? [],
+      isFinal: true,
+    };
   }
 
   private async executeByLabel(
@@ -196,5 +216,28 @@ export class DelegatingAgentService {
       code,
       message,
     };
+  }
+
+  private buildStreamAnswer(
+    output: ClassificationOutput,
+    input: ClassificationInput,
+  ): string {
+    if (output.rag?.answer?.trim()) {
+      return output.rag.answer;
+    }
+
+    if (output.chart) {
+      return 'Chart configuration prepared.';
+    }
+
+    return `Processed query: ${input.query}`;
+  }
+
+  private buildIntermediateAnswer(finalAnswer: string): string {
+    if (finalAnswer.length <= 48) {
+      return finalAnswer;
+    }
+
+    return `${finalAnswer.slice(0, 48).trimEnd()}...`;
   }
 }
