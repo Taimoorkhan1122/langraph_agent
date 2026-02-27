@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { tool } from '@langchain/core/tools';
 import { z } from 'zod';
+import { ChartToolConfig } from './chart.types';
 
 export const ChartType = z.enum(['bar', 'line', 'pie', 'doughnut']);
 
@@ -10,30 +11,6 @@ export const CHART_TOOL_INPUT_SCHEMA = z.object({
 });
 
 export type ChartToolInput = z.infer<typeof CHART_TOOL_INPUT_SCHEMA>;
-
-export interface ChartToolDataset {
-  label: string;
-  data: number[];
-  backgroundColor: string[];
-}
-
-export interface ChartToolConfig {
-  type: z.infer<typeof ChartType>;
-  data: {
-    labels: string[];
-    datasets: ChartToolDataset[];
-  };
-  options: {
-    responsive: boolean;
-    plugins: {
-      legend: { position: 'top' | 'bottom' | 'left' | 'right' };
-      title: {
-        display: boolean;
-        text: string;
-      };
-    };
-  };
-}
 
 export interface ChartToolError {
   code: 'INVALID_CHART_INPUT';

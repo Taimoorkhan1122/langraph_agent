@@ -3,6 +3,8 @@
  * Covers classification input/output, RAG results, and stub chart configs.
  */
 
+import { ChartToolConfig } from './chart.types';
+
 /** The four deterministic classification labels the LLM classifier returns. */
 export type ClassificationLabel = 'chart' | 'rag' | 'direct' | 'hybrid';
 
@@ -73,13 +75,12 @@ export interface RagResult {
  * Shape mirrors Chart.js v3 `ChartConfiguration` at a minimal level.
  */
 export interface ChartResult {
-  type: string;
-  data: {
-    labels: string[];
-    datasets: Array<{ label: string; data: number[] }>;
-  };
-  options: Record<string, unknown>;
+  type: ChartToolConfig['type'];
+  data: ChartToolConfig['data'];
+  options: ChartToolConfig['options'];
 }
+
+export type { ChartToolConfig };
 
 /** Streaming-compatible chart data payload. */
 export interface ChartDataReference {

@@ -2,6 +2,7 @@ import {
   AgentDataReference,
   AgentError,
   ChartDataReference,
+  ChartToolConfig,
   ClassificationOutput,
   RagReference,
   RagResult,
@@ -61,5 +62,30 @@ describe('agent.interfaces contracts', () => {
 
     expect(output.errors?.[0].source).toBe('rag');
     expect(output.rag?.error?.code).toBe('WEAVIATE_ERROR');
+  });
+
+  it('supports strict chart configuration typing with backgroundColor arrays', () => {
+    const config: ChartToolConfig = {
+      type: 'line',
+      data: {
+        labels: ['Jan', 'Feb'],
+        datasets: [
+          {
+            label: 'Revenue',
+            data: [10, 20],
+            backgroundColor: ['#60A5FA', '#34D399'],
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: 'top' },
+          title: { display: true, text: 'Revenue by Month' },
+        },
+      },
+    };
+
+    expect(config.data.datasets[0].backgroundColor).toHaveLength(2);
   });
 });
