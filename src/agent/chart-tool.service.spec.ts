@@ -62,4 +62,39 @@ describe('ChartToolService contracts', () => {
     expect(Array.isArray(parsed.data.datasets)).toBe(true);
     expect(typeof parsed.options).toBe('object');
   });
+
+  it.each(['bar', 'line', 'pie', 'doughnut'] as const)(
+    'generates valid JSON config for %s chart type',
+    async (type) => {
+      const output = await service.generateConfig({
+        type,
+        title: `${type} title`,
+      });
+
+      const parsed = JSON.parse(output) as {
+        type: string;
+        data: {
+          labels: string[];
+          datasets: Array<{
+            label: string;
+            data: number[];
+            backgroundColor: string[];
+          }>;
+        };
+        options: {
+          responsive: boolean;
+          plugins: {
+            title: { display: boolean; text: string };
+          };
+        };
+      };
+
+      expect(parsed.type).toBe(type);
+      expect(parsed.data.labels.length).toBeGreaterThan(0);
+      expect(parsed.data.datasets[0].data.length).toBeGreaterThan(0);
+      expect(parsed.data.datasets[0].backgroundColor.length).toBeGreaterThan(0);
+      expect(parsed.options.responsive).toBe(true);
+      expect(parsed.options.plugins.title.text).toBe(`${type} title`);
+    },
+  );
 });
