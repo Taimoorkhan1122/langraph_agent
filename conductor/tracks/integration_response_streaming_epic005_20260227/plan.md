@@ -16,12 +16,12 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Contracts, Boundaries, and Test Design' (Protocol in workflow.md) (c30dbed)
 
 ## Phase 2: TDD Vertical Slice A - Parallel Hybrid Execution (US-009)
-- [ ] Task: Red - write failing test for hybrid query triggering concurrent tool calls
-    - [ ] Assert both tool interfaces are invoked for `hybrid` classification
-    - [ ] Assert orchestration does not execute strictly sequentially in hybrid path
-- [ ] Task: Green - implement minimal parallel execution orchestration for hybrid path
-    - [ ] Implement concurrent invocation and await-join behavior
-    - [ ] Aggregate successful results into one response structure
+- [x] Task: Red - write failing test for hybrid query triggering concurrent tool calls (669191c)
+    - [x] Assert both tool interfaces are invoked for `hybrid` classification
+    - [x] Assert orchestration does not execute strictly sequentially in hybrid path
+- [x] Task: Green - implement minimal parallel execution orchestration for hybrid path (669191c)
+    - [x] Implement concurrent invocation and await-join behavior
+    - [x] Aggregate successful results into one response structure
 - [ ] Task: Refactor - improve orchestration readability without changing behavior
     - [ ] Extract merge helper(s) behind clear interface
     - [ ] Keep tests green after each small refactor step
