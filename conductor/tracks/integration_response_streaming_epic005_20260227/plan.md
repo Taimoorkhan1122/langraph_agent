@@ -52,9 +52,9 @@
 - [x] Task: Green - implement data accumulation and finalization logic (f9b5afe)
     - [x] Merge outputs from parallel/single flows into final `data`
     - [x] Enforce safe serialization boundaries
-- [ ] Task: Refactor - remove duplication and improve naming in formatter
-    - [ ] Centralize schema guards/validators
-    - [ ] Re-run focused tests after refactor
+- [x] Task: Refactor - remove duplication and improve naming in formatter (bf83111)
+    - [x] Centralize schema guards/validators
+    - [x] Re-run focused tests after refactor
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: TDD Vertical Slice B - Streaming Response Format (US-010)' (Protocol in workflow.md)
 
 ## Phase 4: Integration Quality Gates and Documentation
