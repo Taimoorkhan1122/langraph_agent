@@ -29,13 +29,13 @@
     - [ ] Add unit tests for de-duplicated/sorted page handling
     - [ ] Add unit tests for empty retrieval safe-response behavior
     - [ ] Run tests and confirm failures for new formatting paths
-- [~] Task: Implement answer + structured reference generation (Green)
+- [x] Task: Implement answer + structured reference generation (Green) (0d3c99b)
     - [ ] Implement contextual answer construction from retrieved entries
     - [ ] Implement inline natural reference phrasing in answer text
     - [ ] Implement structured `references` output with `{ type:'rag', fileId, index, pages, snippet? }`
     - [ ] Implement empty-result fallback answer with empty references
     - [ ] Re-run targeted tests and confirm pass
-- [ ] Task: Refactor reference formatter for determinism and maintainability
+- [~] Task: Refactor reference formatter for determinism and maintainability
     - [ ] Extract pure formatter utilities for grouping/indexing logic
     - [ ] Normalize page token handling (string conversion, dedupe)
     - [ ] Re-run tests after refactor
