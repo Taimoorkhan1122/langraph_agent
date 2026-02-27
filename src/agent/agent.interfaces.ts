@@ -99,6 +99,35 @@ export interface AgentError {
   message: string;
 }
 
+/** Execution mode chosen for current request orchestration. */
+export type AgentExecutionMode = 'parallel' | 'sequential';
+
+/** Deterministic execution plan derived from query classification. */
+export interface AgentExecutionPlan {
+  mode: AgentExecutionMode;
+  requiresRag: boolean;
+  requiresChart: boolean;
+  reason: string;
+}
+
+/** The branches that can run in a hybrid orchestration path. */
+export type ParallelBranch = 'rag' | 'chart';
+
+/** Runtime status envelope for each parallel branch. */
+export interface ParallelBranchStatus {
+  branch: ParallelBranch;
+  status: 'success' | 'failed' | 'skipped';
+  errorCode?: string;
+  errorMessage?: string;
+}
+
+/** Streaming payload emitted incrementally to callers. */
+export interface AgentStreamChunk {
+  answer: string;
+  data: AgentDataReference[];
+  isFinal: boolean;
+}
+
 /**
  * The final output of the DelegatingAgentService.
  * Always contains `label`; `rag` and `chart` are populated according to routing.

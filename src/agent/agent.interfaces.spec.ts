@@ -1,9 +1,12 @@
 import {
   AgentDataReference,
   AgentError,
+  AgentExecutionPlan,
+  AgentStreamChunk,
   ChartDataReference,
   ChartToolConfig,
   ClassificationOutput,
+  ParallelBranchStatus,
   RagReference,
   RagResult,
 } from './agent.interfaces';
@@ -87,5 +90,56 @@ describe('agent.interfaces contracts', () => {
     };
 
     expect(config.data.datasets[0].backgroundColor).toHaveLength(2);
+  });
+
+  it('supports explicit execution plan metadata for hybrid parallel orchestration', () => {
+    const plan: AgentExecutionPlan = {
+      mode: 'parallel',
+      requiresRag: true,
+      requiresChart: true,
+      reason: 'hybrid classification',
+    };
+
+    expect(plan.mode).toBe('parallel');
+    expect(plan.requiresRag).toBe(true);
+    expect(plan.requiresChart).toBe(true);
+  });
+
+  it('supports branch status envelopes for partial-failure handling', () => {
+    const status: ParallelBranchStatus = {
+      branch: 'chart',
+      status: 'failed',
+      errorCode: 'CHART_TOOL_ERROR',
+      errorMessage: 'Chart generation failed',
+    };
+
+    expect(status.branch).toBe('chart');
+    expect(status.status).toBe('failed');
+    expect(status.errorCode).toBe('CHART_TOOL_ERROR');
+  });
+
+  it('supports streaming response chunks with progressive answer and cumulative data', () => {
+    const chunk: AgentStreamChunk = {
+      answer: 'Partial answer chunk',
+      data: [],
+      isFinal: false,
+    };
+
+    const finalChunk: AgentStreamChunk = {
+      answer: 'Final answer',
+      data: [
+        {
+          type: 'rag',
+          fileId: 'doc-001',
+          index: 1,
+          pages: ['3', '4'],
+        },
+      ],
+      isFinal: true,
+    };
+
+    expect(chunk.isFinal).toBe(false);
+    expect(finalChunk.isFinal).toBe(true);
+    expect(finalChunk.data[0].type).toBe('rag');
   });
 });
