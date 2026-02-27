@@ -16,6 +16,7 @@ import {
 import { QueryClassifier } from './query-classifier';
 import { RagService } from './rag.service';
 import { ChartToolService } from './chart-tool.service';
+import { createStreamChunk } from './orchestration.contract';
 
 /**
  * Orchestrates the full delegating-agent pipeline:
@@ -69,19 +70,11 @@ export class DelegatingAgentService {
     input: ClassificationInput,
   ): AsyncIterable<AgentStreamChunk> {
     const output = await this.process(input);
-    const finalAnswer = this.buildStreamAnswer(output, input);
+    const chunks = this.buildStreamChunks(output, input);
 
-    yield {
-      answer: this.buildIntermediateAnswer(finalAnswer),
-      data: [],
-      isFinal: false,
-    };
-
-    yield {
-      answer: finalAnswer,
-      data: output.data ?? [],
-      isFinal: true,
-    };
+    for (const chunk of chunks) {
+      yield chunk;
+    }
   }
 
   private async executeByLabel(
@@ -177,9 +170,7 @@ export class DelegatingAgentService {
     }
   }
 
-  private runChart(
-    input: ClassificationInput,
-  ): Partial<ClassificationOutput> {
+  private runChart(input: ClassificationInput): Partial<ClassificationOutput> {
     try {
       const service = this.chartToolService ?? new ChartToolService();
       const serialized = service.generateConfig({
@@ -239,5 +230,17 @@ export class DelegatingAgentService {
     }
 
     return `${finalAnswer.slice(0, 48).trimEnd()}...`;
+  }
+
+  private buildStreamChunks(
+    output: ClassificationOutput,
+    input: ClassificationInput,
+  ): AgentStreamChunk[] {
+    const finalAnswer = this.buildStreamAnswer(output, input);
+
+    return [
+      createStreamChunk(this.buildIntermediateAnswer(finalAnswer), [], false),
+      createStreamChunk(finalAnswer, output.data ?? [], true),
+    ];
   }
 }
