@@ -1,6 +1,6 @@
 # Implementation Plan: EPIC-004 Chart.js Tool (US-008)
 
-## Phase 1: Tool Contract & Scaffolding
+## Phase 1: Tool Contract & Scaffolding [checkpoint: 002514d]
 - [x] Task: Define Chart.js tool input/output contracts (7bac554)
     - [ ] Define chart input schema supporting `bar`, `line`, `pie`, `doughnut`
     - [ ] Define output contract as serialized Chart.js config JSON string
@@ -12,7 +12,7 @@
 - [x] Task: Add/align shared types for chart config payload (60ebb3a)
     - [ ] Add strict TypeScript interfaces/types for config shape
     - [ ] Reuse existing agent/tool interfaces where appropriate
-- [~] Task: Conductor - User Manual Verification 'Phase 1: Tool Contract & Scaffolding' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Tool Contract & Scaffolding' (Protocol in workflow.md) (002514d)
 
 ## Phase 2: TDD - Mock Configuration Generator
 - [ ] Task: Write failing unit tests for valid chart generation (Red)
