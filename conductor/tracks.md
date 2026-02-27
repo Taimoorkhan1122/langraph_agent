@@ -6,9 +6,6 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ## Active Tracks
 
-- [x] **Track: EPIC-005 Integration & Response Streaming (US-009, US-010) - Parallel execution and structured streaming**
-*Link: [./tracks/integration_response_streaming_epic005_20260227/](./tracks/integration_response_streaming_epic005_20260227/)*
-
 ---
 
 ## Archived Tracks
