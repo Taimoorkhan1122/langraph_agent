@@ -85,7 +85,9 @@ describe('Weaviate verify-seed (US-003)', () => {
       const result = await fetchDocumentObjects('http://localhost:8080');
       expect(result).toHaveLength(1);
       expect(result[0]).toEqual(props[0]);
-      expect(createWeaviateClient).toHaveBeenCalledWith('http://localhost:8080');
+      expect(createWeaviateClient).toHaveBeenCalledWith(
+        'http://localhost:8080',
+      );
     });
   });
 

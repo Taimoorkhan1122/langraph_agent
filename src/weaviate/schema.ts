@@ -51,10 +51,30 @@ const documentCollectionConfig = {
   name: DOCUMENT_COLLECTION_NAME,
   multiTenancy: { enabled: true },
   properties: [
-    { name: 'fileId', dataType: 'string', description: 'Unique identifier for each source file', indexInverted: false },
-    { name: 'question', dataType: 'text', description: 'The question being asked (vectorized)', indexInverted: true },
-    { name: 'answer', dataType: 'text', description: 'The answer to the question (vectorized)', indexInverted: true },
-    { name: 'pageNumber', dataType: 'text[]', description: 'Page numbers where answer was derived', indexInverted: false },
+    {
+      name: 'fileId',
+      dataType: 'string',
+      description: 'Unique identifier for each source file',
+      indexInverted: false,
+    },
+    {
+      name: 'question',
+      dataType: 'text',
+      description: 'The question being asked (vectorized)',
+      indexInverted: true,
+    },
+    {
+      name: 'answer',
+      dataType: 'text',
+      description: 'The answer to the question (vectorized)',
+      indexInverted: true,
+    },
+    {
+      name: 'pageNumber',
+      dataType: 'text[]',
+      description: 'Page numbers where answer was derived',
+      indexInverted: false,
+    },
   ],
 } as const;
 

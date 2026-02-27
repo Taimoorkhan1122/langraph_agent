@@ -5,7 +5,11 @@
 
 import { DOCUMENT_COLLECTION_NAME } from './schema';
 import { SAMPLE_TENANT_NAME } from './seed';
-import { createWeaviateClient, closeWeaviateClient, type WeaviateClient } from './client';
+import {
+  createWeaviateClient,
+  closeWeaviateClient,
+  type WeaviateClient,
+} from './client';
 
 export interface DocumentObject {
   fileId?: string;
@@ -22,7 +26,9 @@ export async function fetchDocumentObjectsWithClient(
   tenant: string = SAMPLE_TENANT_NAME,
   limit = 10,
 ): Promise<DocumentObject[]> {
-  const collection = client.collections.get(DOCUMENT_COLLECTION_NAME).withTenant(tenant);
+  const collection = client.collections
+    .get(DOCUMENT_COLLECTION_NAME)
+    .withTenant(tenant);
   const results: DocumentObject[] = [];
   for await (const obj of collection.iterator()) {
     const props = (obj as { properties?: DocumentObject }).properties ?? {};
