@@ -603,7 +603,9 @@ describe('DelegatingAgentService.processStream() – progressive chunks', () => 
     );
 
     const streamApi = service as unknown as {
-      processStream: (payload: ClassificationInput) => AsyncIterable<AgentStreamChunk>;
+      processStream: (
+        payload: ClassificationInput,
+      ) => AsyncIterable<AgentStreamChunk>;
     };
 
     const chunks = await collectChunks(streamApi.processStream(input));
@@ -621,7 +623,9 @@ describe('DelegatingAgentService.processStream() – progressive chunks', () => 
     );
 
     const streamApi = service as unknown as {
-      processStream: (payload: ClassificationInput) => AsyncIterable<AgentStreamChunk>;
+      processStream: (
+        payload: ClassificationInput,
+      ) => AsyncIterable<AgentStreamChunk>;
     };
 
     const chunks = await collectChunks(streamApi.processStream(input));
@@ -629,5 +633,82 @@ describe('DelegatingAgentService.processStream() – progressive chunks', () => 
 
     expect(finalChunk.isFinal).toBe(true);
     expect(finalChunk.data.length).toBeGreaterThan(0);
+  });
+
+  it('emits typed rag references in early streamed data chunks', async () => {
+    const ragResultWithRefs: RagResult = {
+      answer: 'RAG stream answer',
+      sources: [
+        {
+          fileId: 'doc-stream-1',
+          question: 'q',
+          answer: 'a',
+          pageNumber: ['7'],
+        },
+      ],
+      references: [
+        {
+          type: 'rag',
+          fileId: 'doc-stream-1',
+          index: 1,
+          pages: ['7'],
+        },
+      ],
+    };
+
+    const service = new DelegatingAgentService(
+      makeClassifier('hybrid'),
+      makeRagService(ragResultWithRefs).ragService,
+      makeChartToolService().chartToolService as never,
+    );
+
+    const streamApi = service as unknown as {
+      processStream: (
+        payload: ClassificationInput,
+      ) => AsyncIterable<AgentStreamChunk>;
+    };
+
+    const chunks = await collectChunks(streamApi.processStream(input));
+
+    expect(chunks[0].data[0]).toMatchObject({
+      type: 'rag',
+      fileId: 'doc-stream-1',
+      index: 1,
+      pages: ['7'],
+    });
+  });
+
+  it('accumulates chart config objects by the final streamed chunk', async () => {
+    const service = new DelegatingAgentService(
+      makeClassifier('hybrid'),
+      makeRagService().ragService,
+      makeChartToolService().chartToolService as never,
+    );
+
+    const streamApi = service as unknown as {
+      processStream: (
+        payload: ClassificationInput,
+      ) => AsyncIterable<AgentStreamChunk>;
+    };
+
+    const chunks = await collectChunks(streamApi.processStream(input));
+    const finalChunk = chunks[chunks.length - 1];
+
+    expect(finalChunk.data.some((item) => item.type === 'chart')).toBe(true);
+
+    const chartItem = finalChunk.data.find((item) => item.type === 'chart');
+    expect(chartItem).toMatchObject({
+      type: 'chart',
+      config: {
+        type: 'bar',
+        data: {
+          labels: expect.any(Array),
+          datasets: expect.any(Array),
+        },
+        options: {
+          responsive: expect.any(Boolean),
+        },
+      },
+    });
   });
 });
