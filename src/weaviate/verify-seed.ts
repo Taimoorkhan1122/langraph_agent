@@ -1,9 +1,11 @@
 /**
  * Verifies sample document entries are present in Weaviate (US-003).
+ * Uses weaviate-client when given a client; otherwise uses baseUrl with client internally.
  */
 
 import { DOCUMENT_COLLECTION_NAME } from './schema';
 import { SAMPLE_TENANT_NAME } from './seed';
+import { createWeaviateClient, closeWeaviateClient, type WeaviateClient } from './client';
 
 export interface DocumentObject {
   fileId?: string;
@@ -13,27 +15,38 @@ export interface DocumentObject {
 }
 
 /**
+ * Fetches objects from the Document collection for the given tenant using the Weaviate client.
+ */
+export async function fetchDocumentObjectsWithClient(
+  client: WeaviateClient,
+  tenant: string = SAMPLE_TENANT_NAME,
+  limit = 10,
+): Promise<DocumentObject[]> {
+  const collection = client.collections.get(DOCUMENT_COLLECTION_NAME).withTenant(tenant);
+  const results: DocumentObject[] = [];
+  for await (const obj of collection.iterator()) {
+    const props = (obj as { properties?: DocumentObject }).properties ?? {};
+    results.push(props);
+    if (results.length >= limit) break;
+  }
+  return results;
+}
+
+/**
  * Fetches objects from the Document collection for the given tenant.
- * Returns array of properties (and optional vector) per object.
+ * Uses weaviate-client (creates and closes a client when given baseUrl).
  */
 export async function fetchDocumentObjects(
   baseUrl: string,
   tenant: string = SAMPLE_TENANT_NAME,
   limit = 10,
 ): Promise<DocumentObject[]> {
-  const url = `${baseUrl.replace(/\/$/, '')}/v1/objects?class=${DOCUMENT_COLLECTION_NAME}&tenant=${encodeURIComponent(tenant)}&limit=${limit}`;
-  const res = await fetch(url);
-
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`Weaviate objects get failed (${res.status}): ${text}`);
+  const client = await createWeaviateClient(baseUrl);
+  try {
+    return await fetchDocumentObjectsWithClient(client, tenant, limit);
+  } finally {
+    await closeWeaviateClient(client);
   }
-
-  const json = (await res.json()) as {
-    objects?: { properties?: DocumentObject }[];
-  };
-  const objects = json?.objects ?? [];
-  return objects.map((o) => o.properties ?? {});
 }
 
 /**

@@ -2,14 +2,36 @@ import {
   SAMPLE_TENANT_NAME,
   SAMPLE_DOCUMENT_ENTRIES,
   seedSampleDocuments,
+  seedSampleDocumentsWithClient,
   type DocumentEntry,
 } from './seed';
 
-const originalFetch = global.fetch;
+const mockTenantsCreate = jest.fn();
+const mockDataInsert = jest.fn();
+
+jest.mock('./client', () => {
+  const actual = jest.requireActual<typeof import('./client')>('./client');
+  return {
+    ...actual,
+    createWeaviateClient: jest.fn(() =>
+      Promise.resolve({
+        collections: {
+          get: () => ({
+            tenants: { create: mockTenantsCreate },
+            withTenant: () => ({ data: { insert: mockDataInsert } }),
+          }),
+        },
+        close: jest.fn().mockResolvedValue(undefined),
+      }),
+    ),
+  };
+});
 
 describe('Weaviate seed (US-003)', () => {
-  afterEach(() => {
-    global.fetch = originalFetch;
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockTenantsCreate.mockResolvedValue(undefined);
+    mockDataInsert.mockResolvedValue('id');
   });
 
   describe('SAMPLE_DOCUMENT_ENTRIES', () => {
@@ -34,33 +56,55 @@ describe('Weaviate seed (US-003)', () => {
     });
   });
 
-  describe('seedSampleDocuments', () => {
-    it('should create tenant and insert all sample entries', async () => {
-      const calls: { url: string; method: string; body?: string }[] = [];
-      global.fetch = async (url: string, init?: RequestInit) => {
-        calls.push({
-          url,
-          method: init?.method ?? 'GET',
-          body: init?.body as string,
-        });
-        return new Response(null, { status: 200 });
-      };
+  describe('seedSampleDocumentsWithClient', () => {
+    it('should create tenant and insert all sample entries with correct payloads', async () => {
+      const client = {
+        collections: {
+          get: () => ({
+            tenants: { create: mockTenantsCreate },
+            withTenant: () => ({ data: { insert: mockDataInsert } }),
+          }),
+        },
+      } as any;
 
+      await seedSampleDocumentsWithClient(client);
+
+      expect(mockTenantsCreate).toHaveBeenCalledTimes(1);
+      expect(mockTenantsCreate).toHaveBeenCalledWith([
+        { name: SAMPLE_TENANT_NAME, activityStatus: 'ACTIVE' },
+      ]);
+      expect(mockDataInsert).toHaveBeenCalledTimes(
+        SAMPLE_DOCUMENT_ENTRIES.length,
+      );
+      for (let i = 0; i < SAMPLE_DOCUMENT_ENTRIES.length; i++) {
+        const call = mockDataInsert.mock.calls[i][0];
+        expect(call.properties).toMatchObject({
+          fileId: SAMPLE_DOCUMENT_ENTRIES[i].fileId,
+          question: SAMPLE_DOCUMENT_ENTRIES[i].question,
+          answer: SAMPLE_DOCUMENT_ENTRIES[i].answer,
+          pageNumber: SAMPLE_DOCUMENT_ENTRIES[i].pageNumber,
+        });
+      }
+    });
+  });
+
+  describe('seedSampleDocuments', () => {
+    it('should create client, create tenant, and insert all sample entries', async () => {
+      const { createWeaviateClient } = require('./client');
       await seedSampleDocuments('http://localhost:8080');
 
-      const tenantCall = calls.find(
-        (c) => c.url.includes('/tenants') && c.method === 'POST',
+      expect(createWeaviateClient).toHaveBeenCalledWith(
+        'http://localhost:8080',
       );
-      expect(tenantCall).toBeDefined();
-
-      const objectCalls = calls.filter(
-        (c) => c.url.includes('/v1/objects') && c.method === 'POST',
+      expect(mockTenantsCreate).toHaveBeenCalledWith([
+        { name: SAMPLE_TENANT_NAME, activityStatus: 'ACTIVE' },
+      ]);
+      expect(mockDataInsert).toHaveBeenCalledTimes(
+        SAMPLE_DOCUMENT_ENTRIES.length,
       );
-      expect(objectCalls.length).toBe(SAMPLE_DOCUMENT_ENTRIES.length);
 
-      const firstBody = JSON.parse(objectCalls[0].body!);
-      expect(firstBody.class).toBe('Document');
-      expect(firstBody.properties).toMatchObject({
+      const firstCall = mockDataInsert.mock.calls[0][0];
+      expect(firstCall.properties).toMatchObject({
         fileId: expect.any(String),
         question: expect.any(String),
         answer: expect.any(String),

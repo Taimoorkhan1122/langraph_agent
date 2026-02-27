@@ -1,9 +1,14 @@
 /**
  * Sample document entries for Weaviate (US-003).
- * Creates tenant and inserts ≥3 document entries per project docs.
+ * Uses the Weaviate JavaScript client to create tenant and insert ≥3 document entries.
  */
 
 import { DOCUMENT_COLLECTION_NAME } from './schema';
+import {
+  createWeaviateClient,
+  closeWeaviateClient,
+  type WeaviateClient,
+} from './client';
 
 /** Tenant name for sample data (4–64 chars, alphanumeric, underscore, hyphen). */
 export const SAMPLE_TENANT_NAME = 'sample-tenant';
@@ -40,68 +45,77 @@ export const SAMPLE_DOCUMENT_ENTRIES: DocumentEntry[] = [
 ];
 
 /**
- * Ensures the tenant exists by adding it to the Document class (REST).
- * Idempotent: 422 "already exists" is treated as success.
+ * Ensures the tenant exists using the Weaviate client.
+ * Idempotent: treats "already exists" as success.
  */
-async function ensureTenant(
-  baseUrl: string,
+async function ensureTenantWithClient(
+  client: WeaviateClient,
   tenantName: string,
 ): Promise<void> {
-  const url = `${baseUrl.replace(/\/$/, '')}/v1/schema/${DOCUMENT_COLLECTION_NAME}/tenants`;
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify([{ name: tenantName, activityStatus: 'ACTIVE' }]),
-  });
-
-  if (res.ok) return;
-
-  const text = await res.text();
-  if (res.status === 422 && text.includes('already exists')) return;
-
-  throw new Error(`Weaviate tenant create failed (${res.status}): ${text}`);
-}
-
-/**
- * Inserts one object into the Document collection for the given tenant.
- */
-async function insertOne(
-  baseUrl: string,
-  tenant: string,
-  entry: DocumentEntry,
-): Promise<void> {
-  const url = `${baseUrl.replace(/\/$/, '')}/v1/objects`;
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      class: DOCUMENT_COLLECTION_NAME,
-      tenant,
-      properties: {
-        fileId: entry.fileId,
-        question: entry.question,
-        answer: entry.answer,
-        pageNumber: entry.pageNumber,
-      },
-    }),
-  });
-
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`Weaviate object insert failed (${res.status}): ${text}`);
+  const collection = client.collections.get(DOCUMENT_COLLECTION_NAME);
+  try {
+    await collection.tenants.create([
+      { name: tenantName, activityStatus: 'ACTIVE' },
+    ]);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    if (
+      message.includes('already exists') ||
+      message.includes('Conflict') ||
+      message.includes('422')
+    ) {
+      return;
+    }
+    throw new Error(`Weaviate tenant create failed: ${message}`);
   }
 }
 
 /**
- * Creates the sample tenant and inserts all sample document entries.
- * Idempotent: safe to run multiple times (duplicate objects may be created if run repeatedly; for strict idempotency run against a fresh DB or clear tenant first).
+ * Inserts one document entry into the Document collection for the given tenant using the client.
+ */
+async function insertOneWithClient(
+  client: WeaviateClient,
+  tenantName: string,
+  entry: DocumentEntry,
+): Promise<void> {
+  const collection = client.collections.get(DOCUMENT_COLLECTION_NAME);
+  const tenantCollection = collection.withTenant(tenantName);
+  await tenantCollection.data.insert({
+    properties: {
+      fileId: entry.fileId,
+      question: entry.question,
+      answer: entry.answer,
+      pageNumber: entry.pageNumber,
+    },
+  });
+}
+
+/**
+ * Creates the sample tenant and inserts all sample document entries using the Weaviate client.
+ * Idempotent: safe to run multiple times (duplicate objects may be created if run repeatedly).
+ */
+export async function seedSampleDocumentsWithClient(
+  client: WeaviateClient,
+  tenantName: string = SAMPLE_TENANT_NAME,
+): Promise<void> {
+  await ensureTenantWithClient(client, tenantName);
+  for (const entry of SAMPLE_DOCUMENT_ENTRIES) {
+    await insertOneWithClient(client, tenantName, entry);
+  }
+}
+
+/**
+ * Creates the sample tenant and inserts all sample document entries (via weaviate-client).
+ * Idempotent: safe to run multiple times (duplicate objects may be created if run repeatedly).
  */
 export async function seedSampleDocuments(
   baseUrl: string,
   tenantName: string = SAMPLE_TENANT_NAME,
 ): Promise<void> {
-  await ensureTenant(baseUrl, tenantName);
-  for (const entry of SAMPLE_DOCUMENT_ENTRIES) {
-    await insertOne(baseUrl, tenantName, entry);
+  const client = await createWeaviateClient(baseUrl);
+  try {
+    await seedSampleDocumentsWithClient(client, tenantName);
+  } finally {
+    await closeWeaviateClient(client);
   }
 }

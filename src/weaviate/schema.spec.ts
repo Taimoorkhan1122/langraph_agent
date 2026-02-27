@@ -2,13 +2,32 @@ import {
   DOCUMENT_COLLECTION_NAME,
   documentSchemaDefinition,
   createDocumentSchema,
+  createDocumentSchemaWithClient,
 } from './schema';
 
-const originalFetch = global.fetch;
+const mockExists = jest.fn();
+const mockCreate = jest.fn();
+const mockClose = jest.fn();
+
+jest.mock('./client', () => {
+  const actual = jest.requireActual<typeof import('./client')>('./client');
+  return {
+    ...actual,
+    createWeaviateClient: jest.fn(() =>
+      Promise.resolve({
+        collections: { exists: mockExists, create: mockCreate },
+        close: mockClose,
+      }),
+    ),
+  };
+});
 
 describe('Weaviate Document schema (US-002)', () => {
-  afterEach(() => {
-    global.fetch = originalFetch;
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockExists.mockResolvedValue(false);
+    mockCreate.mockResolvedValue(undefined);
+    mockClose.mockResolvedValue(undefined);
   });
 
   describe('documentSchemaDefinition', () => {
@@ -52,34 +71,70 @@ describe('Weaviate Document schema (US-002)', () => {
     });
   });
 
-  describe('createDocumentSchema', () => {
-    it('should POST schema to Weaviate and resolve when ok', async () => {
-      const baseUrl = 'http://localhost:8080';
-      let capturedBody: string | null = null;
-      const fetchMock = async (url: string, init?: RequestInit) => {
-        capturedBody = init?.body as string;
-        return new Response(null, { status: 200 });
-      };
-      (global as unknown as { fetch: typeof fetch }).fetch = fetchMock;
+  describe('createDocumentSchemaWithClient', () => {
+    it('should call collections.create with Document name and multiTenancy when collection does not exist', async () => {
+      mockExists.mockResolvedValue(false);
+      const client = {
+        collections: { exists: mockExists, create: mockCreate },
+      } as any;
 
-      await createDocumentSchema(baseUrl);
+      await createDocumentSchemaWithClient(client);
 
-      expect(capturedBody).toBeTruthy();
-      const body = JSON.parse(capturedBody!);
-      expect(body.class).toBe('Document');
-      expect(body.multiTenancyConfig.enabled).toBe(true);
-      expect(body.properties).toHaveLength(4);
+      expect(mockExists).toHaveBeenCalledWith('Document');
+      expect(mockCreate).toHaveBeenCalledTimes(1);
+      const config = mockCreate.mock.calls[0][0];
+      expect(config.name).toBe('Document');
+      expect(config.multiTenancy).toEqual({ enabled: true });
+      expect(config.properties).toHaveLength(4);
     });
 
-    it('should throw with message when response is not ok', async () => {
-      (global as unknown as { fetch: typeof fetch }).fetch = async () =>
-        new Response(JSON.stringify({ error: [{ message: 'Bad config' }] }), {
-          status: 400,
-        });
+    it('should not call create when collection already exists', async () => {
+      mockExists.mockResolvedValue(true);
+      const client = {
+        collections: { exists: mockExists, create: mockCreate },
+      } as any;
+
+      await createDocumentSchemaWithClient(client);
+
+      expect(mockExists).toHaveBeenCalledWith('Document');
+      expect(mockCreate).not.toHaveBeenCalled();
+    });
+
+    it('should treat already-exists error from create as success', async () => {
+      mockExists.mockResolvedValue(false);
+      mockCreate.mockRejectedValue(new Error('collection already exists'));
+      const client = {
+        collections: { exists: mockExists, create: mockCreate },
+      } as any;
 
       await expect(
-        createDocumentSchema('http://localhost:8080'),
-      ).rejects.toThrow(/Weaviate schema create failed \(400\)/);
+        createDocumentSchemaWithClient(client),
+      ).resolves.toBeUndefined();
+    });
+
+    it('should throw when create fails with other error', async () => {
+      mockExists.mockResolvedValue(false);
+      mockCreate.mockRejectedValue(new Error('Bad config'));
+      const client = {
+        collections: { exists: mockExists, create: mockCreate },
+      } as any;
+
+      await expect(createDocumentSchemaWithClient(client)).rejects.toThrow(
+        /Weaviate schema create failed/,
+      );
+    });
+  });
+
+  describe('createDocumentSchema', () => {
+    it('should create client, call createDocumentSchemaWithClient, and close', async () => {
+      const { createWeaviateClient } = require('./client');
+      await createDocumentSchema('http://localhost:8080');
+
+      expect(createWeaviateClient).toHaveBeenCalledWith(
+        'http://localhost:8080',
+      );
+      expect(mockCreate).toHaveBeenCalled();
+      expect(mockClose).toHaveBeenCalled();
     });
   });
 });
