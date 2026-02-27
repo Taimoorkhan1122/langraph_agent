@@ -37,9 +37,9 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 2: TDD Vertical Slice A - Parallel Hybrid Execution (US-009)' (Protocol in workflow.md)
 
 ## Phase 3: TDD Vertical Slice B - Streaming Response Format (US-010)
-- [ ] Task: Red - write failing tests for progressive streaming chunks
-    - [ ] Assert intermediate chunks emit partial `answer`
-    - [ ] Assert final chunk includes complete `data` array
+- [x] Task: Red - write failing tests for progressive streaming chunks (8404aab)
+    - [x] Assert intermediate chunks emit partial `answer`
+    - [x] Assert final chunk includes complete `data` array
 - [ ] Task: Green - implement minimal streaming formatter/emitter
     - [ ] Implement async iterator or stream emission path through public interface
     - [ ] Ensure schema compliance for each emitted chunk
