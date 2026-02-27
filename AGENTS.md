@@ -39,3 +39,57 @@ To find a file (e.g., "**Product Definition**") within a specific context (Proje
 - **Implementation Plan**: `conductor/tracks/<track_id>/plan.md`
 - **Metadata**: `conductor/tracks/<track_id>/metadata.json`
 
+
+
+# Skills System
+
+<!-- SKILLKIT_SKILLS_START -->
+
+## Available Skills
+
+- **nestjs-best-practices**: NestJS best practices and architecture patterns for building production-ready applications. This skill should be used when writing, reviewing, or refactoring NestJS code to ensure proper patterns for modules, dependency injection, security, and performance.
+- **tdd**: Test-driven development with red-green-refactor loop. Use when user wants to build features or fix bugs using TDD, mentions "red-green-refactor", wants integration tests, or asks for test-first development.
+
+## How to Use Skills
+
+When a task matches one of the available skills, load it to get detailed instructions:
+
+```bash
+skillkit read <skill-name>
+```
+
+Or with npx:
+
+```bash
+npx skillkit read <skill-name>
+```
+
+## Skills Data
+
+<skills_system>
+<usage>
+Skills provide specialized capabilities and domain knowledge.
+- Invoke: `skillkit read <skill-name>`
+- Base directory provided in output for resolving resources
+- Only use skills listed below
+- Each invocation is stateless
+</usage>
+
+<available_skills>
+
+<skill>
+<name>nestjs-best-practices</name>
+<description>NestJS best practices and architecture patterns for building production-ready applications. This skill should be used when writing, reviewing, or refactoring NestJS code to ensure proper patterns for modules, dependency injection, security, and performance.</description>
+<location>project</location>
+</skill>
+
+<skill>
+<name>tdd</name>
+<description>Test-driven development with red-green-refactor loop. Use when user wants to build features or fix bugs using TDD, mentions &quot;red-green-refactor&quot;, wants integration tests, or asks for test-first development.</description>
+<location>project</location>
+</skill>
+
+</available_skills>
+</skills_system>
+
+<!-- SKILLKIT_SKILLS_END -->
