@@ -36,11 +36,11 @@
     - [ ] Test malformed payload error handling
     - [ ] Test tool callable registration path in delegating agent context
     - [ ] Run targeted tests and confirm failures
-- [~] Task: Implement structured validation and error handling (Green)
+- [x] Task: Implement structured validation and error handling (Green) (c1b8cc4)
     - [ ] Return descriptive structured errors for invalid inputs
     - [ ] Keep successful path unchanged for valid payloads
     - [ ] Ensure registration path stays callable
-- [ ] Task: Execute quality gates and stabilize
+- [~] Task: Execute quality gates and stabilize
     - [ ] Run `pnpm run lint`
     - [ ] Run `CI=true pnpm test`
     - [ ] Run `CI=true pnpm run test:cov` and confirm coverage target for changed modules
