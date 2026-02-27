@@ -37,11 +37,15 @@ const defaultRagResult: RagResult = {
   ],
 };
 
-const makeRagService = (result: RagResult = defaultRagResult): RagService => {
-  const mock = {
-    query: jest.fn().mockResolvedValue(result),
+const makeRagService = (
+  result: RagResult = defaultRagResult,
+): { ragService: RagService; queryMock: jest.Mock } => {
+  const queryMock = jest.fn().mockResolvedValue(result);
+  const ragService = {
+    query: queryMock,
   } as unknown as RagService;
-  return mock;
+
+  return { ragService, queryMock };
 };
 
 // ---------------------------------------------------------------------------
@@ -76,7 +80,7 @@ describe('DelegatingAgentService.process() – routing', () => {
   it('routes a chart query → label "chart", no rag, has chart', async () => {
     const service = new DelegatingAgentService(
       makeClassifier('chart'),
-      makeRagService(),
+      makeRagService().ragService,
     );
     const output = await service.process(input);
 
@@ -88,7 +92,7 @@ describe('DelegatingAgentService.process() – routing', () => {
   it('routes a RAG query → label "rag", has rag, no chart', async () => {
     const service = new DelegatingAgentService(
       makeClassifier('rag'),
-      makeRagService(),
+      makeRagService().ragService,
     );
     const output = await service.process(input);
 
@@ -100,7 +104,7 @@ describe('DelegatingAgentService.process() – routing', () => {
   it('routes a direct query → label "direct", no rag, no chart', async () => {
     const service = new DelegatingAgentService(
       makeClassifier('direct'),
-      makeRagService(),
+      makeRagService().ragService,
     );
     const output = await service.process(input);
 
@@ -112,7 +116,7 @@ describe('DelegatingAgentService.process() – routing', () => {
   it('routes a hybrid query → label "hybrid", has rag AND chart', async () => {
     const service = new DelegatingAgentService(
       makeClassifier('hybrid'),
-      makeRagService(),
+      makeRagService().ragService,
     );
     const output = await service.process(input);
 
@@ -133,7 +137,7 @@ describe('DelegatingAgentService.process() – RAG tool invocation', () => {
   };
 
   it('calls RagService.query() with the input query and tenantName for "rag" path', async () => {
-    const ragService = makeRagService();
+    const { ragService, queryMock } = makeRagService();
     const service = new DelegatingAgentService(
       makeClassifier('rag'),
       ragService,
@@ -141,15 +145,12 @@ describe('DelegatingAgentService.process() – RAG tool invocation', () => {
 
     await service.process(input);
 
-    expect(ragService.query as jest.Mock).toHaveBeenCalledTimes(1);
-    expect(ragService.query as jest.Mock).toHaveBeenCalledWith(
-      input.query,
-      input.tenantName,
-    );
+    expect(queryMock.mock.calls).toHaveLength(1);
+    expect(queryMock.mock.calls[0]).toEqual([input.query, input.tenantName]);
   });
 
   it('calls RagService.query() for "hybrid" path as well', async () => {
-    const ragService = makeRagService();
+    const { ragService, queryMock } = makeRagService();
     const service = new DelegatingAgentService(
       makeClassifier('hybrid'),
       ragService,
@@ -157,11 +158,11 @@ describe('DelegatingAgentService.process() – RAG tool invocation', () => {
 
     await service.process(input);
 
-    expect(ragService.query as jest.Mock).toHaveBeenCalledTimes(1);
+    expect(queryMock.mock.calls).toHaveLength(1);
   });
 
   it('does NOT call RagService.query() for "chart" path', async () => {
-    const ragService = makeRagService();
+    const { ragService, queryMock } = makeRagService();
     const service = new DelegatingAgentService(
       makeClassifier('chart'),
       ragService,
@@ -169,11 +170,11 @@ describe('DelegatingAgentService.process() – RAG tool invocation', () => {
 
     await service.process(input);
 
-    expect(ragService.query as jest.Mock).not.toHaveBeenCalled();
+    expect(queryMock.mock.calls).toHaveLength(0);
   });
 
   it('does NOT call RagService.query() for "direct" path', async () => {
-    const ragService = makeRagService();
+    const { ragService, queryMock } = makeRagService();
     const service = new DelegatingAgentService(
       makeClassifier('direct'),
       ragService,
@@ -181,11 +182,11 @@ describe('DelegatingAgentService.process() – RAG tool invocation', () => {
 
     await service.process(input);
 
-    expect(ragService.query as jest.Mock).not.toHaveBeenCalled();
+    expect(queryMock.mock.calls).toHaveLength(0);
   });
 
   it('surfaces the RAG result in the output for "rag" path', async () => {
-    const ragService = makeRagService(defaultRagResult);
+    const { ragService } = makeRagService(defaultRagResult);
     const service = new DelegatingAgentService(
       makeClassifier('rag'),
       ragService,
@@ -210,7 +211,7 @@ describe('DelegatingAgentService.process() – stub chart config', () => {
   it('returns a valid stub ChartResult for "chart" path', async () => {
     const service = new DelegatingAgentService(
       makeClassifier('chart'),
-      makeRagService(),
+      makeRagService().ragService,
     );
     const output = await service.process(input);
 
@@ -226,7 +227,7 @@ describe('DelegatingAgentService.process() – stub chart config', () => {
   it('returns a valid stub ChartResult for "hybrid" path', async () => {
     const service = new DelegatingAgentService(
       makeClassifier('hybrid'),
-      makeRagService(),
+      makeRagService().ragService,
     );
     const output = await service.process(input);
 
@@ -356,7 +357,7 @@ describe('DelegatingAgentService.process() – streaming data compatibility', ()
 
     const service = new DelegatingAgentService(
       makeClassifier('rag'),
-      makeRagService(ragResultWithRefs),
+      makeRagService(ragResultWithRefs).ragService,
     );
 
     const output = await service.process(input);
@@ -374,7 +375,7 @@ describe('DelegatingAgentService.process() – streaming data compatibility', ()
   it('maps chart config into output.data for chart path', async () => {
     const service = new DelegatingAgentService(
       makeClassifier('chart'),
-      makeRagService(),
+      makeRagService().ragService,
     );
 
     const output = await service.process(input);
@@ -406,7 +407,7 @@ describe('DelegatingAgentService.process() – streaming data compatibility', ()
 
     const service = new DelegatingAgentService(
       makeClassifier('hybrid'),
-      makeRagService(ragResultWithRefs),
+      makeRagService(ragResultWithRefs).ragService,
     );
 
     const output = await service.process(input);

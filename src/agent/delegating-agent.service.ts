@@ -127,7 +127,10 @@ export class DelegatingAgentService {
       );
       return { rag };
     } catch (err) {
-      this.logger.error('RAG service failed; returning degraded rag result', err);
+      this.logger.error(
+        'RAG service failed; returning degraded rag result',
+        err,
+      );
       return {
         rag: {
           answer: 'RAG retrieval is temporarily unavailable.',

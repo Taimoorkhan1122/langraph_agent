@@ -50,13 +50,13 @@ export class RagService {
   /**
    * Performs a semantic search and returns a `RagResult`.
    *
-  * API boundary:
-  * - `query` is user-provided search text.
-  * - `tenantName` identifies the isolated multi-tenant partition.
-  * - callers are responsible for ensuring tenant is present.
-  *
-  * @param query      - The user's raw query.
-  * @param tenantName - The Weaviate tenant to search within.
+   * API boundary:
+   * - `query` is user-provided search text.
+   * - `tenantName` identifies the isolated multi-tenant partition.
+   * - callers are responsible for ensuring tenant is present.
+   *
+   * @param query      - The user's raw query.
+   * @param tenantName - The Weaviate tenant to search within.
    * @param limit      - Maximum number of source documents to return.
    */
   async query(
