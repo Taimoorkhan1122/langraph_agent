@@ -91,6 +91,13 @@ export interface ChartDataReference {
 /** Heterogeneous data references for response streaming. */
 export type AgentDataReference = RagReference | ChartDataReference;
 
+/** Stable error payload surfaced to upstream callers. */
+export interface AgentError {
+  source: 'classifier' | 'rag' | 'chart';
+  code: string;
+  message: string;
+}
+
 /**
  * The final output of the DelegatingAgentService.
  * Always contains `label`; `rag` and `chart` are populated according to routing.
@@ -104,4 +111,6 @@ export interface ClassificationOutput {
   chart?: ChartResult;
   /** Streaming-compatible data references (rag refs and/or chart config). */
   data?: AgentDataReference[];
+  /** Stable error envelope for degraded/partial responses. */
+  errors?: AgentError[];
 }

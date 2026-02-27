@@ -259,7 +259,7 @@ describe('DelegatingAgentService.process() – error handling', () => {
     expect(output.chart).toBeUndefined();
   });
 
-  it('returns partial result (label=rag, no rag data) when RAG service throws', async () => {
+  it('returns partial degraded rag result when RAG service throws', async () => {
     const failingRag = {
       query: jest.fn().mockRejectedValue(new Error('Weaviate down')),
     } as unknown as RagService;
@@ -271,7 +271,59 @@ describe('DelegatingAgentService.process() – error handling', () => {
     const output = await service.process(input);
 
     expect(output.label).toBe('rag');
-    expect(output.rag).toBeUndefined();
+    expect(output.rag).toBeDefined();
+    expect(output.rag?.error).toMatchObject({
+      code: 'WEAVIATE_ERROR',
+      message: 'RAG retrieval failed',
+    });
+  });
+
+  it('returns stable error envelope when RAG service throws', async () => {
+    const failingRag = {
+      query: jest.fn().mockRejectedValue(new Error('Weaviate unavailable')),
+    } as unknown as RagService;
+    const service = new DelegatingAgentService(
+      makeClassifier('rag'),
+      failingRag,
+    );
+
+    const output = await service.process(input);
+
+    expect(output.errors).toEqual([
+      {
+        source: 'rag',
+        code: 'WEAVIATE_ERROR',
+        message: 'RAG retrieval failed',
+      },
+    ]);
+    expect(output.rag).toEqual({
+      answer: 'RAG retrieval is temporarily unavailable.',
+      sources: [],
+      references: [],
+      error: {
+        code: 'WEAVIATE_ERROR',
+        message: 'RAG retrieval failed',
+      },
+    });
+  });
+
+  it('returns chart data even when rag fails in hybrid path', async () => {
+    const failingRag = {
+      query: jest.fn().mockRejectedValue(new Error('Downstream timeout')),
+    } as unknown as RagService;
+    const service = new DelegatingAgentService(
+      makeClassifier('hybrid'),
+      failingRag,
+    );
+
+    const output = await service.process(input);
+
+    expect(output.label).toBe('hybrid');
+    expect(output.data?.some((item) => item.type === 'chart')).toBe(true);
+    expect(output.errors?.[0]).toMatchObject({
+      source: 'rag',
+      code: 'WEAVIATE_ERROR',
+    });
   });
 });
 
