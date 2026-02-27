@@ -93,12 +93,12 @@ export class DelegatingAgentService {
     if (label === 'hybrid') {
       [ragResult, chartResult] = await Promise.all([
         this.runRag(input),
-        this.runChart(input),
+        Promise.resolve(this.runChart(input)),
       ]);
     } else if (label === 'rag') {
       ragResult = await this.runRag(input);
     } else if (label === 'chart') {
-      chartResult = await this.runChart(input);
+      chartResult = this.runChart(input);
     }
 
     return { ragResult, chartResult };

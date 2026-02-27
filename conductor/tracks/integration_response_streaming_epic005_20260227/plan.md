@@ -61,11 +61,12 @@
 - [x] Task: Add/adjust integration-style tests through public service entry points (d8a0dc1)
     - [x] Verify non-hybrid routes (`direct`, `rag`, `chart`) are not regressed
     - [x] Verify hybrid + streaming full flow end-to-end at service layer
-- [ ] Task: Execute project quality gates
-    - [ ] Run `pnpm run lint`
-    - [ ] Run `CI=true pnpm test`
-    - [ ] Run `CI=true pnpm run test:cov`
-- [ ] Task: Document any stack/workflow deviations before implementation changes if needed
-    - [ ] Update `conductor/tech-stack.md` only if design changes require it
-    - [ ] Update relevant docs if public behavior/contract changed
-- [ ] Task: Conductor - User Manual Verification 'Phase 4: Integration Quality Gates and Documentation' (Protocol in workflow.md)
+- [x] Task: Execute project quality gates (lint deviation documented; EPIC-005 scope checks passed)
+    - [x] Run `pnpm run lint` (fails only on pre-existing issues in `src/weaviate/*.spec.ts`; no remaining lint errors in EPIC-005 touched agent files)
+    - [x] Run `CI=true pnpm test`
+    - [x] Run `CI=true pnpm run test:cov`
+- [x] Task: Document any stack/workflow deviations before implementation changes if needed
+    - [x] Update `conductor/tech-stack.md` only if design changes require it (not required)
+    - [x] Update relevant docs if public behavior/contract changed (this plan note documents quality-gate deviation scope)
+    - [x] Deviation recorded: lint gate remains red due to existing strict-lint debt in `src/weaviate/schema.spec.ts`, `src/weaviate/seed.spec.ts`, and `src/weaviate/verify-seed.spec.ts`; EPIC-005 agent scope lint is clean
+- [x] Task: Conductor - User Manual Verification 'Phase 4: Integration Quality Gates and Documentation' (Protocol in workflow.md) (5b864e7)

@@ -697,19 +697,15 @@ describe('DelegatingAgentService.processStream() – progressive chunks', () => 
     expect(finalChunk.data.some((item) => item.type === 'chart')).toBe(true);
 
     const chartItem = finalChunk.data.find((item) => item.type === 'chart');
-    expect(chartItem).toMatchObject({
-      type: 'chart',
-      config: {
-        type: 'bar',
-        data: {
-          labels: expect.any(Array),
-          datasets: expect.any(Array),
-        },
-        options: {
-          responsive: expect.any(Boolean),
-        },
-      },
-    });
+    expect(chartItem).toBeDefined();
+    if (chartItem?.type !== 'chart') {
+      throw new Error('Expected chart data reference');
+    }
+
+    expect(chartItem.config.type).toBe('bar');
+    expect(Array.isArray(chartItem.config.data.labels)).toBe(true);
+    expect(Array.isArray(chartItem.config.data.datasets)).toBe(true);
+    expect(typeof chartItem.config.options.responsive).toBe('boolean');
   });
 });
 
