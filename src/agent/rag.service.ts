@@ -25,8 +25,9 @@ interface WeaviateNearTextResponse {
 }
 
 /**
- * Queries Weaviate's Document collection using vector nearText search.
- * Returns a `RagResult` with a synthesised answer and source documents.
+ * Queries Weaviate's Document collection using tenant-scoped retrieval.
+ * Returns a `RagResult` with a synthesised answer, source documents,
+ * and (when available) structured provenance references.
  *
  * The "answer" is assembled from retrieved documents rather than an LLM call,
  * keeping this service lightweight and independently unit-testable.
@@ -40,8 +41,13 @@ export class RagService {
   /**
    * Performs a semantic search and returns a `RagResult`.
    *
-   * @param query      - The user's raw query.
-   * @param tenantName - The Weaviate tenant to search within.
+  * API boundary:
+  * - `query` is user-provided search text.
+  * - `tenantName` identifies the isolated multi-tenant partition.
+  * - callers are responsible for ensuring tenant is present.
+  *
+  * @param query      - The user's raw query.
+  * @param tenantName - The Weaviate tenant to search within.
    * @param limit      - Maximum number of source documents to return.
    */
   async query(

@@ -25,12 +25,47 @@ export interface RagSource {
   pageNumber: string[];
 }
 
+/** Input contract for tenant-scoped RAG queries. */
+export interface RagRequest {
+  /** End-user query text to retrieve and answer from knowledge base. */
+  query: string;
+  /** Required tenant context for strict multi-tenant isolation. */
+  tenantName: string;
+  /** Optional retrieval limit override. */
+  limit?: number;
+}
+
+/** Structured reference item returned by RAG for provenance. */
+export interface RagReference {
+  type: 'rag';
+  fileId: string;
+  index: number;
+  pages: string[];
+  snippet?: string;
+}
+
+/** Typed error envelope for expected RAG validation/runtime failures. */
+export interface RagErrorResult {
+  code: 'TENANT_REQUIRED' | 'WEAVIATE_ERROR' | 'EMPTY_RESULT';
+  message: string;
+}
+
+/** Canonical RAG output contract used at tool/service boundary. */
+export interface RagOutput {
+  answer: string;
+  references: RagReference[];
+}
+
 /** Result returned by the RAG tool/service. */
 export interface RagResult {
   /** Synthesised answer generated from retrieved documents. */
   answer: string;
   /** Raw source documents used to produce the answer. */
   sources: RagSource[];
+  /** Structured provenance references for frontend consumption. */
+  references?: RagReference[];
+  /** Optional typed error information for degraded responses. */
+  error?: RagErrorResult;
 }
 
 /**
