@@ -5,10 +5,10 @@
     - [x] Define/confirm state fields required for parallel execution and aggregation
     - [x] Define streaming chunk contract (`answer`, `data`) and finalization behavior
     - [x] Define partial-failure contract for single-branch parallel failures
-- [ ] Task: Identify service/module boundaries using NestJS best practices
-    - [ ] Ensure constructor-injected dependencies only
-    - [ ] Ensure responsibilities are split between classifier/orchestrator/stream formatter
-    - [ ] Confirm no circular dependency introduction in agent module wiring
+- [x] Task: Identify service/module boundaries using NestJS best practices (c2d44ff)
+    - [x] Ensure constructor-injected dependencies only
+    - [x] Ensure responsibilities are split between classifier/orchestrator/stream formatter
+    - [x] Confirm no circular dependency introduction in agent module wiring
 - [ ] Task: Design vertical-slice TDD scenarios before coding
     - [ ] List behavior-first tests for hybrid parallel success path
     - [ ] List behavior-first tests for partial-failure path
