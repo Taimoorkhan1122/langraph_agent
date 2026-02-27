@@ -1,147 +1,156 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# RAG Agent Task
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A **LangGraph hierarchical agent** built with NestJS that routes user queries to the right tools: **RAG** (document retrieval via Weaviate), **Chart** (mock Chart.js config), **direct** (conversational), or **hybrid** (RAG + Chart in parallel). Responses are streamed over HTTP with structured references and provenance.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## What This Project Is
 
-## Description
+- **Backend API** – NestJS app exposing a single streaming endpoint: `POST /agent/stream`.
+- **Delegating agent** – An LLM classifies each query into one of four labels; a LangGraph StateGraph runs the corresponding branch (RAG, chart, direct, or hybrid) and formats the result.
+- **Multi-tenant RAG** – Weaviate vector DB with a `Document` collection (multi-tenancy enabled). The RAG path runs semantic search per tenant and returns an answer plus file/page references.
+- **Chart tool** – Mock Chart.js config generator (bar, line, pie, doughnut) used when the user asks for a chart or when the classification is `hybrid`.
+- **Streaming** – Agent responses are sent as Server-Sent Events (SSE) with chunks containing `answer`, `data` (references), and `isFinal`.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Agent Features
 
-## Project setup
+| Feature | Description |
+|--------|-------------|
+| **Query classification** | LLM (Gemini) classifies the query into `chart`, `rag`, `direct`, or `hybrid` using an optional tool call for structured output. |
+| **Routing** | LangGraph conditional edges route from the classify node to `run_rag`, `run_chart`, `run_direct`, or `run_hybrid`. |
+| **RAG path** | Tenant-scoped semantic search in Weaviate (`nearText`), with fallback to `fetchObjects` when vector search is unavailable. Returns synthesised answer, sources, and references (fileId, index, pages). |
+| **Chart path** | Generates a mock Chart.js config (type, data, options) for bar/line/pie/doughnut. |
+| **Direct path** | No tools; used when the query needs a direct conversational answer only. |
+| **Hybrid path** | Runs RAG and Chart in parallel; merges both into the final state and streamed response. |
+| **Streaming** | `processStream()` yields chunks: intermediate chunk (short answer + early RAG refs), then final chunk (full answer + all refs and chart config). |
+| **References** | RAG references: `{ type: 'rag', fileId, index, pages }`. Chart: `{ type: 'chart', config }`. All in the `data` array of each chunk. |
+
+## Tech Stack
+
+- **Runtime:** Node.js  
+- **Framework:** NestJS 11  
+- **Agent:** LangGraph (StateGraph), LangChain (prompts, optional tool binding), Google Gemini  
+- **Vector DB:** Weaviate (Docker), multi-tenant `Document` schema  
+- **Language:** TypeScript  
+
+## Project Setup
+
+### 1. Install dependencies
 
 ```bash
-$ pnpm install
+pnpm install
 ```
 
-### Weaviate (vector database)
+### 2. Environment
 
-The app uses [Weaviate](https://weaviate.io/) for vector search. Run it locally with Docker Compose:
+Create a `.env` file (or set in the environment):
+
+- `GEMINI_API_KEY` or `GOOGLE_API_KEY` – required for the query classifier (Gemini).
+- `GEMINI_MODEL` (optional) – e.g. `gemini-2.5-flash` (default used in code).
+- `WEAVIATE_URL` (optional) – default `http://localhost:8080`.
+
+### 3. Weaviate (vector database)
+
+Run Weaviate with Docker Compose:
 
 ```bash
-$ docker compose up -d
+docker compose up -d
 ```
 
 - **URL:** http://localhost:8080  
-- **Health check:** `curl http://localhost:8080/v1/.well-known/ready` (expect HTTP 200)
-- **Environment:** `AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED=true`, `PERSISTENCE_DATA_PATH=/var/lib/weaviate`. Data is stored in the `weaviate_data` volume.
+- **Health:** `curl http://localhost:8080/v1/.well-known/ready` (expect HTTP 200)
 
-After Weaviate is running, create the multi-tenant Document schema (US-002):
-
-```bash
-$ pnpm run schema:create
-```
-
-Optional: set `WEAVIATE_URL` (default `http://localhost:8080`) if Weaviate is elsewhere.
-
-Seed sample document entries (US-003) into the `sample-tenant` tenant:
+Create the multi-tenant Document schema:
 
 ```bash
-$ pnpm run seed
+pnpm run schema:create
 ```
 
-This creates the tenant, inserts three sample document entries (doc-001, doc-002, doc-003), and verifies they are retrievable.
+Seed sample documents into the `sample-tenant` tenant:
 
-### RAG agent behavior (EPIC-003)
-
-`RagService` provides tenant-scoped retrieval and provenance-aware answers.
-
-- **Tenant required:** calls must include a non-empty tenant name.
-- **Retrieval strategy:** semantic GraphQL retrieval first (`nearText`), then fallback to `fetchObjects` when semantic retrieval is unsupported.
-- **Output shape:** answer text plus grouped, deterministic references.
-
-Example reference object:
-
-```json
-{
-  "type": "rag",
-  "fileId": "doc-001",
-  "index": 1,
-  "pages": ["5", "6"]
-}
+```bash
+pnpm run seed
 ```
 
-Inline references are also appended to answers in natural format, e.g. `1- Pages 5, 6 and 2- Page 12`.
+This inserts sample document entries and verifies they are retrievable.
 
-## Compile and run the project
+### 4. Run the app
 
 ```bash
 # development
-$ pnpm run start
+pnpm run start
 
 # watch mode
-$ pnpm run start:dev
-
-# production mode
-$ pnpm run start:prod
+pnpm run start:dev
 ```
 
-## Run tests
+Default HTTP port: `3000` (or as configured for NestJS).
+
+## API
+
+### `POST /agent/stream`
+
+Streams the agent response as Server-Sent Events.
+
+**Request body (JSON):**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `query` | string | Yes | User query to classify and process. |
+| `tenantName` | string | No | Tenant for RAG/hybrid; required for correct RAG results. |
+
+**Response:** `Content-Type: text/event-stream`. Each event is a JSON line:
+
+```json
+{ "answer": "...", "data": [...], "isFinal": false }
+{ "answer": "...", "data": [...], "isFinal": true }
+```
+
+- `answer` – Text answer (intermediate or final).
+- `data` – Array of references: RAG refs `{ type: "rag", fileId, index, pages }` and/or chart ref `{ type: "chart", config }`.
+- `isFinal` – `true` on the last chunk.
+
+**Example:**
+
+```bash
+curl -X POST http://localhost:3000/agent/stream \
+  -H "Content-Type: application/json" \
+  -d '{"query": "What is in the documents?", "tenantName": "sample-tenant"}'
+```
+
+## Run Tests
 
 ```bash
 # unit tests
-$ pnpm run test
+pnpm run test
 
 # e2e tests
-$ pnpm run test:e2e
+pnpm run test:e2e
 
-# test coverage
-$ pnpm run test:cov
+# coverage
+pnpm run test:cov
 ```
 
-## Deployment
+## Scripts
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+| Script | Purpose |
+|--------|---------|
+| `pnpm run schema:create` | Create Weaviate Document schema (multi-tenant). |
+| `pnpm run seed` | Seed sample documents into `sample-tenant`. |
+| `pnpm run smoke:agent` | Smoke test for the delegating agent. |
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+## Project Structure (agent & RAG)
 
-```bash
-$ pnpm install -g @nestjs/mau
-$ mau deploy
-```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+| Area | Location |
+|------|----------|
+| Agent controller | `src/agent/agent.controller.ts` – `POST /agent/stream` |
+| Delegating agent | `src/agent/delegating-agent.service.ts` – orchestration, streaming |
+| LangGraph | `src/agent/agent.graph.ts` – StateGraph: classify → rag/chart/direct/hybrid → format |
+| Query classifier | `src/agent/query-classifier.ts` – LLM classification (optional tool call) |
+| RAG | `src/agent/rag.service.ts` – Weaviate semantic search + references |
+| Chart tool | `src/agent/chart-tool.service.ts` – mock Chart.js config |
+| Contracts | `src/agent/agent.interfaces.ts` – labels, RAG/chart results, stream chunks |
+| Weaviate schema | `src/weaviate/schema.ts`, `src/weaviate/client.ts` |
+| Weaviate seed | `src/weaviate/seed.ts` |
 
 ## License
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+MIT (or as specified in the repository).
