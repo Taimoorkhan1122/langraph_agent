@@ -30,7 +30,7 @@
     - [ ] Re-run tests to confirm pass state
 - [x] Task: Conductor - User Manual Verification 'Phase 2: TDD - Mock Configuration Generator' (Protocol in workflow.md) (7ce7d80)
 
-## Phase 3: TDD - Validation, Registration & Quality Gates
+## Phase 3: TDD - Validation, Registration & Quality Gates [checkpoint: d6cc8bc]
 - [x] Task: Write failing tests for invalid input and registration behavior (Red) (ae58dd5)
     - [ ] Test unsupported chart type error
     - [ ] Test malformed payload error handling
@@ -46,4 +46,4 @@
     - [ ] Run `CI=true pnpm run test:cov` and confirm coverage target for changed modules
 - [x] Task: Update docs where needed (no changes required)
     - [ ] Update relevant conductor/docs references for EPIC-004 track
-- [~] Task: Conductor - User Manual Verification 'Phase 3: TDD - Validation, Registration & Quality Gates' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 3: TDD - Validation, Registration & Quality Gates' (Protocol in workflow.md) (d6cc8bc)
