@@ -1,7 +1,7 @@
 # Implementation Plan — EPIC-003 RAG Agent (US-006, US-007)
 
 ## Phase 1: Tenant-Scoped Retrieval Foundation
-- [ ] Task: Define RAG input/output contracts and tenant validation behavior
+- [x] Task: Define RAG input/output contracts and tenant validation behavior (7b309d7)
     - [ ] Add/confirm TypeScript interfaces for RAG request, retrieval result, and error result
     - [ ] Define required tenant input contract and missing-tenant error shape
     - [ ] Document function-level API boundaries for retrieval and answer generation
