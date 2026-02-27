@@ -19,6 +19,10 @@ const makeWeaviateResponse = (docs: unknown[]) => ({
   },
 });
 
+const makeFetchObjectsResponse = (docs: Array<Record<string, unknown>>) => ({
+  objects: docs.map((properties) => ({ properties })),
+});
+
 const originalFetch = global.fetch;
 
 describe('RagService', () => {
@@ -176,18 +180,16 @@ describe('RagService', () => {
         .mockResolvedValueOnce({
           ok: true,
           json: () =>
-            Promise.resolve({
-              objects: [
+            Promise.resolve(
+              makeFetchObjectsResponse([
                 {
-                  properties: {
-                    fileId: 'doc-xyz',
-                    question: QUERY,
-                    answer: 'Fallback answer.',
-                    pageNumber: ['3'],
-                  },
+                  fileId: 'doc-xyz',
+                  question: QUERY,
+                  answer: 'Fallback answer.',
+                  pageNumber: ['3'],
                 },
-              ],
-            }),
+              ]),
+            ),
         });
       global.fetch = mockFetch;
 

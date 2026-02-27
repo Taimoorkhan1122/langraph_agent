@@ -13,25 +13,22 @@ const DEFAULT_LIMIT = 3;
 interface WeaviateNearTextResponse {
   data?: {
     Get?: {
-      Document?: Array<{
-        fileId?: string;
-        question?: string;
-        answer?: string;
-        pageNumber?: string[];
-      }>;
+      Document?: WeaviateDocumentProperties[];
     };
   };
   errors?: Array<{ message: string }>;
 }
 
+interface WeaviateDocumentProperties {
+  fileId?: string;
+  question?: string;
+  answer?: string;
+  pageNumber?: string[];
+}
+
 interface WeaviateObjectsResponse {
   objects?: Array<{
-    properties?: {
-      fileId?: string;
-      question?: string;
-      answer?: string;
-      pageNumber?: string[];
-    };
+    properties?: WeaviateDocumentProperties;
   }>;
 }
 
@@ -120,14 +117,7 @@ export class RagService {
     tenantName: string,
     limit: number,
     graphqlQuery: { query: string },
-  ): Promise<
-    Array<{
-      fileId?: string;
-      question?: string;
-      answer?: string;
-      pageNumber?: string[];
-    }>
-  > {
+  ): Promise<WeaviateDocumentProperties[]> {
     const res = await fetch(`${baseUrl}/v1/graphql`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -169,14 +159,7 @@ export class RagService {
     baseUrl: string,
     tenantName: string,
     limit: number,
-  ): Promise<
-    Array<{
-      fileId?: string;
-      question?: string;
-      answer?: string;
-      pageNumber?: string[];
-    }>
-  > {
+  ): Promise<WeaviateDocumentProperties[]> {
     const params = new URLSearchParams({
       class: DOCUMENT_COLLECTION_NAME,
       tenant: tenantName,
