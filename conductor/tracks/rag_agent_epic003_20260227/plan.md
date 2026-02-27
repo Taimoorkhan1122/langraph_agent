@@ -20,7 +20,7 @@
     - [ ] Remove duplication and isolate query strategy decision logic
     - [ ] Improve mocks/fixtures for Weaviate client behavior
     - [ ] Re-run tests after refactor
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Tenant-Scoped Retrieval Foundation' (Protocol in workflow.md)
+- [~] Task: Conductor - User Manual Verification 'Phase 1: Tenant-Scoped Retrieval Foundation' (Protocol in workflow.md)
 
 ## Phase 2: Answer Generation and Reference Provenance
 - [ ] Task: Write failing tests for answer composition and reference formatting (Red)
