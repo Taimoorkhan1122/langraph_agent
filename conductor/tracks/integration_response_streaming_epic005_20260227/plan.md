@@ -43,9 +43,9 @@
 - [x] Task: Green - implement minimal streaming formatter/emitter (49fc35c)
     - [x] Implement async iterator or stream emission path through public interface
     - [x] Ensure schema compliance for each emitted chunk
-- [ ] Task: Refactor - simplify streaming flow while preserving contract
-    - [ ] Extract chunk-builder utilities
-    - [ ] Keep deterministic emission order for tests
+- [x] Task: Refactor - simplify streaming flow while preserving contract (0090733)
+    - [x] Extract chunk-builder utilities
+    - [x] Keep deterministic emission order for tests
 - [ ] Task: Red - write failing tests for data object typing and accumulation
     - [ ] Validate rag references object shape in `data`
     - [ ] Validate chart config object shape in `data`
