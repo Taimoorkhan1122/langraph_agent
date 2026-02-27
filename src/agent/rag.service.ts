@@ -5,7 +5,7 @@
 
 import { Injectable, Logger } from '@nestjs/common';
 import { DOCUMENT_COLLECTION_NAME } from '../weaviate/schema';
-import { RagResult, RagSource } from './agent.interfaces';
+import { RagReference, RagResult, RagSource } from './agent.interfaces';
 
 /** Maximum number of documents to retrieve per query. */
 const DEFAULT_LIMIT = 3;
@@ -100,16 +100,66 @@ export class RagService {
       pageNumber: d.pageNumber ?? [],
     }));
 
+    const references = this.buildReferences(sources);
+
     const answer =
       sources.length > 0
-        ? sources.map((s) => s.answer).join('\n\n')
+        ? `${sources.map((s) => s.answer).join('\n\n')}\n\nBased on ${this.formatInlineReferences(references)}.`
         : 'No relevant documents found.';
 
     this.logger.log(
       `RAG query retrieved ${sources.length} document(s) for tenant "${tenantName}"`,
     );
 
-    return { answer, sources };
+    return { answer, sources, references };
+  }
+
+  private buildReferences(sources: RagSource[]): RagReference[] {
+    const grouped = new Map<string, Set<string>>();
+    const order: string[] = [];
+
+    for (const source of sources) {
+      const fileId = source.fileId;
+      if (!fileId) {
+        continue;
+      }
+
+      if (!grouped.has(fileId)) {
+        grouped.set(fileId, new Set());
+        order.push(fileId);
+      }
+
+      const pages = source.pageNumber ?? [];
+      for (const page of pages) {
+        grouped.get(fileId)?.add(String(page));
+      }
+    }
+
+    return order.map((fileId, index) => {
+      const pages = Array.from(grouped.get(fileId) ?? []).sort((left, right) =>
+        Number(left) - Number(right),
+      );
+
+      return {
+        type: 'rag',
+        fileId,
+        index: index + 1,
+        pages,
+      };
+    });
+  }
+
+  private formatInlineReferences(references: RagReference[]): string {
+    if (references.length === 0) {
+      return 'no indexed pages';
+    }
+
+    return references
+      .map((reference) => {
+        const pagesLabel = reference.pages.length > 1 ? 'Pages' : 'Page';
+        return `${reference.index}- ${pagesLabel} ${reference.pages.join(', ')}`;
+      })
+      .join(' and ');
   }
 
   private async fetchWithSemanticFallback(
