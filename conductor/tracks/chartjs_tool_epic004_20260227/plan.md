@@ -15,7 +15,7 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Tool Contract & Scaffolding' (Protocol in workflow.md) (002514d)
 
 ## Phase 2: TDD - Mock Configuration Generator
-- [ ] Task: Write failing unit tests for valid chart generation (Red)
+- [x] Task: Write failing unit tests for valid chart generation (Red) (917b4c6)
     - [ ] Add tests for `bar` output shape and required fields
     - [ ] Add tests for `line` output shape and required fields
     - [ ] Add tests for `pie` and `doughnut` output shape and required fields
