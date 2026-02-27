@@ -58,9 +58,9 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 3: TDD Vertical Slice B - Streaming Response Format (US-010)' (Protocol in workflow.md) (89a05cf)
 
 ## Phase 4: Integration Quality Gates and Documentation
-- [ ] Task: Add/adjust integration-style tests through public service entry points
-    - [ ] Verify non-hybrid routes (`direct`, `rag`, `chart`) are not regressed
-    - [ ] Verify hybrid + streaming full flow end-to-end at service layer
+- [x] Task: Add/adjust integration-style tests through public service entry points (d8a0dc1)
+    - [x] Verify non-hybrid routes (`direct`, `rag`, `chart`) are not regressed
+    - [x] Verify hybrid + streaming full flow end-to-end at service layer
 - [ ] Task: Execute project quality gates
     - [ ] Run `pnpm run lint`
     - [ ] Run `CI=true pnpm test`
