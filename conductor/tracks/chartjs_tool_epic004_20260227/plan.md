@@ -9,7 +9,7 @@
     - [ ] Add provider registration in agent/tool module
     - [ ] Ensure constructor-based DI and export where needed
     - [ ] Verify no circular dependencies are introduced
-- [ ] Task: Add/align shared types for chart config payload
+- [x] Task: Add/align shared types for chart config payload (60ebb3a)
     - [ ] Add strict TypeScript interfaces/types for config shape
     - [ ] Reuse existing agent/tool interfaces where appropriate
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Tool Contract & Scaffolding' (Protocol in workflow.md)
