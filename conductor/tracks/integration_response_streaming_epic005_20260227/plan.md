@@ -1,6 +1,6 @@
 # Implementation Plan: EPIC-005 Integration & Response Streaming (US-009, US-010)
 
-## Phase 1: Contracts, Boundaries, and Test Design
+## Phase 1: Contracts, Boundaries, and Test Design [checkpoint: c30dbed]
 - [x] Task: Define orchestration and streaming contracts for EPIC-005 (9d43c4b)
     - [x] Define/confirm state fields required for parallel execution and aggregation
     - [x] Define streaming chunk contract (`answer`, `data`) and finalization behavior
@@ -13,7 +13,7 @@
     - [x] List behavior-first tests for hybrid parallel success path
     - [x] List behavior-first tests for partial-failure path
     - [x] List behavior-first tests for streaming progressive emission + final data chunk
-- [~] Task: Conductor - User Manual Verification 'Phase 1: Contracts, Boundaries, and Test Design' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Contracts, Boundaries, and Test Design' (Protocol in workflow.md) (c30dbed)
 
 ## Phase 2: TDD Vertical Slice A - Parallel Hybrid Execution (US-009)
 - [ ] Task: Red - write failing test for hybrid query triggering concurrent tool calls
