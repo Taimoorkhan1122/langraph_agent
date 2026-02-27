@@ -46,11 +46,11 @@
     - [ ] Ensure delegating agent can consume `answer` and `references`
     - [ ] Confirm compatibility with EPIC-005 streaming data shape expectations
     - [ ] Add/update adapter mapping tests at boundary layer
-- [~] Task: Implement robust error handling paths
+- [x] Task: Implement robust error handling paths (214f88f)
     - [ ] Add explicit handling for Weaviate connection failures
     - [ ] Add partial-result handling where safe to return degraded output
     - [ ] Validate stable error response format for upstream caller
-- [ ] Task: Execute quality gates
+- [~] Task: Execute quality gates
     - [ ] Run `pnpm run lint` and fix relevant issues in touched files
     - [ ] Run `CI=true pnpm test` for full suite confidence
     - [ ] Run `CI=true pnpm run test:cov` and ensure new/changed modules meet coverage target
