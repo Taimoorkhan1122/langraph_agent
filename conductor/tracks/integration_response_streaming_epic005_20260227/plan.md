@@ -40,9 +40,9 @@
 - [x] Task: Red - write failing tests for progressive streaming chunks (8404aab)
     - [x] Assert intermediate chunks emit partial `answer`
     - [x] Assert final chunk includes complete `data` array
-- [ ] Task: Green - implement minimal streaming formatter/emitter
-    - [ ] Implement async iterator or stream emission path through public interface
-    - [ ] Ensure schema compliance for each emitted chunk
+- [x] Task: Green - implement minimal streaming formatter/emitter (49fc35c)
+    - [x] Implement async iterator or stream emission path through public interface
+    - [x] Ensure schema compliance for each emitted chunk
 - [ ] Task: Refactor - simplify streaming flow while preserving contract
     - [ ] Extract chunk-builder utilities
     - [ ] Keep deterministic emission order for tests
