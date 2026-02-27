@@ -145,6 +145,104 @@ describe('RagService', () => {
       const [url] = mockFetch.mock.calls[0] as [string, unknown];
       expect(url).toBe(`${BASE_URL}/v1/graphql`);
     });
+
+    it('groups pages by fileId and assigns deterministic sequential indices', async () => {
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        json: () =>
+          Promise.resolve(
+            makeWeaviateResponse([
+              {
+                fileId: 'doc-001',
+                question: 'q1',
+                answer: 'A1',
+                pageNumber: ['5'],
+              },
+              {
+                fileId: 'doc-001',
+                question: 'q2',
+                answer: 'A2',
+                pageNumber: ['6'],
+              },
+              {
+                fileId: 'doc-002',
+                question: 'q3',
+                answer: 'A3',
+                pageNumber: ['2'],
+              },
+            ]),
+          ),
+      });
+
+      const result = await service.query(QUERY, TENANT);
+
+      expect(result.references).toEqual([
+        { type: 'rag', fileId: 'doc-001', index: 1, pages: ['5', '6'] },
+        { type: 'rag', fileId: 'doc-002', index: 2, pages: ['2'] },
+      ]);
+    });
+
+    it('de-duplicates and sorts page numbers inside each grouped reference', async () => {
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        json: () =>
+          Promise.resolve(
+            makeWeaviateResponse([
+              {
+                fileId: 'doc-010',
+                question: 'q1',
+                answer: 'A1',
+                pageNumber: ['7', '3', '7'],
+              },
+              {
+                fileId: 'doc-010',
+                question: 'q2',
+                answer: 'A2',
+                pageNumber: ['5'],
+              },
+            ]),
+          ),
+      });
+
+      const result = await service.query(QUERY, TENANT);
+
+      expect(result.references).toEqual([
+        { type: 'rag', fileId: 'doc-010', index: 1, pages: ['3', '5', '7'] },
+      ]);
+    });
+
+    it('includes natural inline references in answer text', async () => {
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        json: () =>
+          Promise.resolve(
+            makeWeaviateResponse([
+              {
+                fileId: 'doc-001',
+                question: 'q1',
+                answer: 'Refund policy is 30 days.',
+                pageNumber: ['5', '6'],
+              },
+            ]),
+          ),
+      });
+
+      const result = await service.query(QUERY, TENANT);
+
+      expect(result.answer).toContain('1- Pages 5, 6');
+    });
+
+    it('returns empty references on empty retrieval result', async () => {
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(makeWeaviateResponse([])),
+      });
+
+      const result = await service.query(QUERY, TENANT);
+
+      expect(result.answer).toBe('No relevant documents found.');
+      expect(result.references).toEqual([]);
+    });
   });
 
   describe('query() – error paths', () => {
