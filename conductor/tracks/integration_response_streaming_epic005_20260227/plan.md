@@ -49,9 +49,9 @@
 - [x] Task: Red - write failing tests for data object typing and accumulation (a5204a2)
     - [x] Validate rag references object shape in `data`
     - [x] Validate chart config object shape in `data`
-- [ ] Task: Green - implement data accumulation and finalization logic
-    - [ ] Merge outputs from parallel/single flows into final `data`
-    - [ ] Enforce safe serialization boundaries
+- [x] Task: Green - implement data accumulation and finalization logic (f9b5afe)
+    - [x] Merge outputs from parallel/single flows into final `data`
+    - [x] Enforce safe serialization boundaries
 - [ ] Task: Refactor - remove duplication and improve naming in formatter
     - [ ] Centralize schema guards/validators
     - [ ] Re-run focused tests after refactor
