@@ -50,11 +50,11 @@
     - [ ] Add explicit handling for Weaviate connection failures
     - [ ] Add partial-result handling where safe to return degraded output
     - [ ] Validate stable error response format for upstream caller
-- [~] Task: Execute quality gates
+- [x] Task: Execute quality gates (68ef5b5)
     - [ ] Run `pnpm run lint` and fix relevant issues in touched files
     - [ ] Run `CI=true pnpm test` for full suite confidence
     - [ ] Run `CI=true pnpm run test:cov` and ensure new/changed modules meet coverage target
-- [ ] Task: Update project documentation for EPIC-003 behavior
+- [~] Task: Update project documentation for EPIC-003 behavior
     - [ ] Update relevant docs/readme sections describing tenant requirement and fallback logic
     - [ ] Document reference output structure and examples
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Integration Hardening, Quality Gates, and Documentation' (Protocol in workflow.md)
