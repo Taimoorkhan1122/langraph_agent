@@ -31,9 +31,9 @@
 - [x] Task: Green - implement partial-failure tolerant aggregation
     - [x] Preserve successful branch data
     - [x] Emit controlled error context for failed branch
-- [ ] Task: Refactor - harden error paths and remove duplication
-    - [ ] Consolidate branch error mapping
-    - [ ] Re-run targeted tests to confirm no behavior regressions
+- [x] Task: Refactor - harden error paths and remove duplication
+    - [x] Consolidate branch error mapping
+    - [x] Re-run targeted tests to confirm no behavior regressions
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: TDD Vertical Slice A - Parallel Hybrid Execution (US-009)' (Protocol in workflow.md)
 
 ## Phase 3: TDD Vertical Slice B - Streaming Response Format (US-010)

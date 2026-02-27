@@ -10,6 +10,7 @@ import {
   ClassificationOutput,
   ClassificationLabel,
   ChartResult,
+  AgentError,
 } from './agent.interfaces';
 import { QueryClassifier } from './query-classifier';
 import { RagService } from './rag.service';
@@ -125,30 +126,33 @@ export class DelegatingAgentService {
     input: ClassificationInput,
   ): Promise<Partial<ClassificationOutput>> {
     try {
-      const rag = await this.ragService.query(input.query, input.tenantName ?? 'default');
+      const rag = await this.ragService.query(
+        input.query,
+        input.tenantName ?? 'default',
+      );
       return { rag };
     } catch (err) {
       this.logger.error(
         'RAG service failed; returning degraded rag result',
         err,
       );
+      const error = this.createBranchError(
+        'rag',
+        'WEAVIATE_ERROR',
+        'RAG retrieval failed',
+      );
+
       return {
         rag: {
           answer: 'RAG retrieval is temporarily unavailable.',
           sources: [],
           references: [],
           error: {
-            code: 'WEAVIATE_ERROR',
-            message: 'RAG retrieval failed',
+            code: error.code,
+            message: error.message,
           },
         },
-        errors: [
-          {
-            source: 'rag',
-            code: 'WEAVIATE_ERROR',
-            message: 'RAG retrieval failed',
-          },
-        ],
+        errors: [error],
       };
     }
   }
@@ -170,15 +174,27 @@ export class DelegatingAgentService {
         'Chart tool failed; returning degraded chart result',
         err,
       );
+      const error = this.createBranchError(
+        'chart',
+        'CHART_TOOL_ERROR',
+        'Chart generation failed',
+      );
+
       return {
-        errors: [
-          {
-            source: 'chart',
-            code: 'CHART_TOOL_ERROR',
-            message: 'Chart generation failed',
-          },
-        ],
+        errors: [error],
       };
     }
+  }
+
+  private createBranchError(
+    source: AgentError['source'],
+    code: AgentError['code'],
+    message: AgentError['message'],
+  ): AgentError {
+    return {
+      source,
+      code,
+      message,
+    };
   }
 }
