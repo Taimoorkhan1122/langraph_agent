@@ -22,7 +22,7 @@
     - [ ] Re-run tests after refactor
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Tenant-Scoped Retrieval Foundation' (Protocol in workflow.md) (2a73fc2)
 
-## Phase 2: Answer Generation and Reference Provenance
+## Phase 2: Answer Generation and Reference Provenance [checkpoint: 1a7b8ff]
 - [x] Task: Write failing tests for answer composition and reference formatting (Red) (a141b84)
     - [ ] Add unit tests for grouping pages by `fileId`
     - [ ] Add unit tests for deterministic sequential index assignment
@@ -39,7 +39,7 @@
     - [ ] Extract pure formatter utilities for grouping/indexing logic
     - [ ] Normalize page token handling (string conversion, dedupe)
     - [ ] Re-run tests after refactor
-- [~] Task: Conductor - User Manual Verification 'Phase 2: Answer Generation and Reference Provenance' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Answer Generation and Reference Provenance' (Protocol in workflow.md) (1a7b8ff)
 
 ## Phase 3: Integration Hardening, Quality Gates, and Documentation
 - [ ] Task: Integrate RAG output contract with delegating-agent/tool boundary
