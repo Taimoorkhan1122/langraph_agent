@@ -5,7 +5,7 @@
     - [ ] Define chart input schema supporting `bar`, `line`, `pie`, `doughnut`
     - [ ] Define output contract as serialized Chart.js config JSON string
     - [ ] Define structured error model for invalid input
-- [ ] Task: Prepare NestJS module wiring for tool instantiation
+- [x] Task: Prepare NestJS module wiring for tool instantiation (aac3275)
     - [ ] Add provider registration in agent/tool module
     - [ ] Ensure constructor-based DI and export where needed
     - [ ] Verify no circular dependencies are introduced
