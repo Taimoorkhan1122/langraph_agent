@@ -13,6 +13,8 @@ import {
   AgentError,
   AgentStreamChunk,
   AgentDataReference,
+  RagReference,
+  ChartDataReference,
 } from './agent.interfaces';
 import { QueryClassifier } from './query-classifier';
 import { RagService } from './rag.service';
@@ -238,7 +240,8 @@ export class DelegatingAgentService {
     input: ClassificationInput,
   ): AgentStreamChunk[] {
     const finalAnswer = this.buildStreamAnswer(output, input);
-    const earlyData = this.buildEarlyStreamData(output.data ?? []);
+    const normalizedData = this.normalizeStreamData(output.data ?? []);
+    const earlyData = this.buildEarlyStreamData(normalizedData);
 
     return [
       createStreamChunk(
@@ -246,13 +249,31 @@ export class DelegatingAgentService {
         earlyData,
         false,
       ),
-      createStreamChunk(finalAnswer, output.data ?? [], true),
+      createStreamChunk(finalAnswer, normalizedData, true),
     ];
+  }
+
+  private normalizeStreamData(
+    data: AgentDataReference[],
+  ): AgentDataReference[] {
+    return data.filter(
+      (item) => this.isRagReference(item) || this.isChartDataReference(item),
+    );
   }
 
   private buildEarlyStreamData(
     data: AgentDataReference[],
   ): AgentDataReference[] {
-    return data.filter((item) => item.type === 'rag');
+    return data.filter((item) => this.isRagReference(item));
+  }
+
+  private isRagReference(item: AgentDataReference): item is RagReference {
+    return item.type === 'rag';
+  }
+
+  private isChartDataReference(
+    item: AgentDataReference,
+  ): item is ChartDataReference {
+    return item.type === 'chart';
   }
 }
