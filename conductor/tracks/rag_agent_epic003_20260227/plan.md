@@ -23,13 +23,13 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Tenant-Scoped Retrieval Foundation' (Protocol in workflow.md) (2a73fc2)
 
 ## Phase 2: Answer Generation and Reference Provenance
-- [ ] Task: Write failing tests for answer composition and reference formatting (Red)
+- [x] Task: Write failing tests for answer composition and reference formatting (Red) (a141b84)
     - [ ] Add unit tests for grouping pages by `fileId`
     - [ ] Add unit tests for deterministic sequential index assignment
     - [ ] Add unit tests for de-duplicated/sorted page handling
     - [ ] Add unit tests for empty retrieval safe-response behavior
     - [ ] Run tests and confirm failures for new formatting paths
-- [ ] Task: Implement answer + structured reference generation (Green)
+- [~] Task: Implement answer + structured reference generation (Green)
     - [ ] Implement contextual answer construction from retrieved entries
     - [ ] Implement inline natural reference phrasing in answer text
     - [ ] Implement structured `references` output with `{ type:'rag', fileId, index, pages, snippet? }`
