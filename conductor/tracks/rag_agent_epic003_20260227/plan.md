@@ -41,7 +41,7 @@
     - [ ] Re-run tests after refactor
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Answer Generation and Reference Provenance' (Protocol in workflow.md) (1a7b8ff)
 
-## Phase 3: Integration Hardening, Quality Gates, and Documentation
+## Phase 3: Integration Hardening, Quality Gates, and Documentation [checkpoint: c7dbc2b]
 - [x] Task: Integrate RAG output contract with delegating-agent/tool boundary (6ead35c)
     - [ ] Ensure delegating agent can consume `answer` and `references`
     - [ ] Confirm compatibility with EPIC-005 streaming data shape expectations
@@ -57,10 +57,10 @@
 - [x] Task: Update project documentation for EPIC-003 behavior (1ac72ee)
     - [ ] Update relevant docs/readme sections describing tenant requirement and fallback logic
     - [ ] Document reference output structure and examples
-- [~] Task: Conductor - User Manual Verification 'Phase 3: Integration Hardening, Quality Gates, and Documentation' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Integration Hardening, Quality Gates, and Documentation' (Protocol in workflow.md) (c7dbc2b)
 
 ## Completion Criteria
-- [ ] US-006 and US-007 acceptance criteria are satisfied with passing automated tests.
-- [ ] RAG retrieval is tenant-scoped with semantic-first fallback behavior.
-- [ ] Output includes both answer text (with natural references) and structured provenance objects.
-- [ ] Lint, tests, and coverage checks pass for touched scope.
+- [x] US-006 and US-007 acceptance criteria are satisfied with passing automated tests.
+- [x] RAG retrieval is tenant-scoped with semantic-first fallback behavior.
+- [x] Output includes both answer text (with natural references) and structured provenance objects.
+- [x] Lint, tests, and coverage checks pass for touched scope.
