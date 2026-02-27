@@ -25,13 +25,13 @@
 - [x] Task: Refactor - improve orchestration readability without changing behavior (c408598)
     - [x] Extract merge helper(s) behind clear interface
     - [x] Keep tests green after each small refactor step
-- [x] Task: Red - write failing test for hybrid single-branch failure handling
+- [x] Task: Red - write failing test for hybrid single-branch failure handling (56801bd)
     - [x] Simulate chart failure with rag success
     - [x] Simulate rag failure with chart success
-- [x] Task: Green - implement partial-failure tolerant aggregation
+- [x] Task: Green - implement partial-failure tolerant aggregation (56801bd)
     - [x] Preserve successful branch data
     - [x] Emit controlled error context for failed branch
-- [x] Task: Refactor - harden error paths and remove duplication
+- [x] Task: Refactor - harden error paths and remove duplication (5f35c5d)
     - [x] Consolidate branch error mapping
     - [x] Re-run targeted tests to confirm no behavior regressions
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: TDD Vertical Slice A - Parallel Hybrid Execution (US-009)' (Protocol in workflow.md)
