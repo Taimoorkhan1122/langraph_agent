@@ -48,6 +48,38 @@ const makeRagService = (
   return { ragService, queryMock };
 };
 
+const defaultSerializedChart = JSON.stringify({
+  type: 'bar',
+  data: {
+    labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+    datasets: [
+      {
+        label: 'Mock bar chart',
+        data: [42, 55, 38, 61],
+        backgroundColor: ['#2563EB', '#0EA5E9', '#14B8A6', '#22C55E'],
+      },
+    ],
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { position: 'top' },
+      title: { display: true, text: 'Mock bar chart' },
+    },
+  },
+});
+
+const makeChartToolService = (): {
+  chartToolService: { generateConfig: jest.Mock };
+  generateConfigMock: jest.Mock;
+} => {
+  const generateConfigMock = jest.fn().mockReturnValue(defaultSerializedChart);
+  return {
+    chartToolService: { generateConfig: generateConfigMock },
+    generateConfigMock,
+  };
+};
+
 // ---------------------------------------------------------------------------
 // 1. LLM classification output contract
 // ---------------------------------------------------------------------------
@@ -195,6 +227,44 @@ describe('DelegatingAgentService.process() – RAG tool invocation', () => {
     const output = await service.process(input);
 
     expect(output.rag).toEqual(defaultRagResult);
+  });
+
+  it('starts chart branch before rag resolves for hybrid path', async () => {
+    let ragResolved = false;
+
+    const queryMock = jest
+      .fn()
+      .mockImplementation(
+        () =>
+          new Promise<RagResult>((resolve) => {
+            setTimeout(() => {
+              ragResolved = true;
+              resolve(defaultRagResult);
+            }, 25);
+          }),
+      );
+
+    const ragService = {
+      query: queryMock,
+    } as unknown as RagService;
+
+    const { generateConfigMock } = makeChartToolService();
+    generateConfigMock.mockImplementation(() => {
+      expect(ragResolved).toBe(false);
+      return defaultSerializedChart;
+    });
+
+    const service = new DelegatingAgentService(
+      makeClassifier('hybrid'),
+      ragService,
+      { generateConfig: generateConfigMock } as never,
+    );
+
+    const output = await service.process(input);
+
+    expect(queryMock).toHaveBeenCalledTimes(1);
+    expect(generateConfigMock).toHaveBeenCalledTimes(1);
+    expect(output.errors).toBeUndefined();
   });
 });
 
