@@ -12,7 +12,7 @@
 - [x] Task: Add/align shared types for chart config payload (60ebb3a)
     - [ ] Add strict TypeScript interfaces/types for config shape
     - [ ] Reuse existing agent/tool interfaces where appropriate
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Tool Contract & Scaffolding' (Protocol in workflow.md)
+- [~] Task: Conductor - User Manual Verification 'Phase 1: Tool Contract & Scaffolding' (Protocol in workflow.md)
 
 ## Phase 2: TDD - Mock Configuration Generator
 - [ ] Task: Write failing unit tests for valid chart generation (Red)
