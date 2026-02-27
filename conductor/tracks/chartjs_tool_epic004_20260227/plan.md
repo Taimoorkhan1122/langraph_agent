@@ -14,7 +14,7 @@
     - [ ] Reuse existing agent/tool interfaces where appropriate
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Tool Contract & Scaffolding' (Protocol in workflow.md) (002514d)
 
-## Phase 2: TDD - Mock Configuration Generator
+## Phase 2: TDD - Mock Configuration Generator [checkpoint: 7ce7d80]
 - [x] Task: Write failing unit tests for valid chart generation (Red) (917b4c6)
     - [ ] Add tests for `bar` output shape and required fields
     - [ ] Add tests for `line` output shape and required fields
@@ -28,7 +28,7 @@
     - [ ] Remove duplication in config builders
     - [ ] Preserve deterministic outputs and public behavior
     - [ ] Re-run tests to confirm pass state
-- [~] Task: Conductor - User Manual Verification 'Phase 2: TDD - Mock Configuration Generator' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: TDD - Mock Configuration Generator' (Protocol in workflow.md) (7ce7d80)
 
 ## Phase 3: TDD - Validation, Registration & Quality Gates
 - [ ] Task: Write failing tests for invalid input and registration behavior (Red)
