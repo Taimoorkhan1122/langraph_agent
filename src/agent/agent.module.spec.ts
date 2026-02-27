@@ -3,6 +3,7 @@ import { AgentModule } from './agent.module';
 import { QueryClassifier } from './query-classifier';
 import { RagService } from './rag.service';
 import { DelegatingAgentService } from './delegating-agent.service';
+import { ChartToolService } from './chart-tool.service';
 
 describe('AgentModule', () => {
   let moduleRef: TestingModule;
@@ -20,6 +21,10 @@ describe('AgentModule', () => {
 
   it('provides RagService', () => {
     expect(moduleRef.get(RagService)).toBeInstanceOf(RagService);
+  });
+
+  it('provides ChartToolService', () => {
+    expect(moduleRef.get(ChartToolService)).toBeInstanceOf(ChartToolService);
   });
 
   it('exports DelegatingAgentService', () => {

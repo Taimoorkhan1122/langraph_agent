@@ -9,6 +9,7 @@ import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { QueryClassifier } from './query-classifier';
 import { RagService } from './rag.service';
 import { DelegatingAgentService } from './delegating-agent.service';
+import { ChartToolService } from './chart-tool.service';
 
 /** Token for the Weaviate base URL injection. */
 export const WEAVIATE_BASE_URL = 'WEAVIATE_BASE_URL';
@@ -33,6 +34,7 @@ export const WEAVIATE_BASE_URL = 'WEAVIATE_BASE_URL';
         return new RagService(url);
       },
     },
+    ChartToolService,
     DelegatingAgentService,
   ],
   exports: [DelegatingAgentService],
