@@ -46,9 +46,9 @@
 - [x] Task: Refactor - simplify streaming flow while preserving contract (0090733)
     - [x] Extract chunk-builder utilities
     - [x] Keep deterministic emission order for tests
-- [ ] Task: Red - write failing tests for data object typing and accumulation
-    - [ ] Validate rag references object shape in `data`
-    - [ ] Validate chart config object shape in `data`
+- [x] Task: Red - write failing tests for data object typing and accumulation (a5204a2)
+    - [x] Validate rag references object shape in `data`
+    - [x] Validate chart config object shape in `data`
 - [ ] Task: Green - implement data accumulation and finalization logic
     - [ ] Merge outputs from parallel/single flows into final `data`
     - [ ] Enforce safe serialization boundaries
