@@ -4,9 +4,25 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [x] **Track: EPIC-002 Delegating Agent (US-004) - LLM-driven classification**
-*Link: [./tracks/delegating_agent_epic002_20260227/](./tracks/delegating_agent_epic002_20260227/)*
+## Active Tracks
+
+- [~] **Track: EPIC-005 Integration & Response Streaming (US-009, US-010) - Parallel execution and structured streaming**
+*Link: [./tracks/integration_response_streaming_epic005_20260227/](./tracks/integration_response_streaming_epic005_20260227/)*
 
 ---
+
+## Archived Tracks
+
+- [x] **Track: EPIC-001 Vector DB Infrastructure**
+*Link: [./archive/vector_db_infra_20250227/](./archive/vector_db_infra_20250227/)*
+
+- [x] **Track: EPIC-002 Delegating Agent (US-004) - LLM-driven classification**
+*Link: [./archive/delegating_agent_epic002_20260227/](./archive/delegating_agent_epic002_20260227/)*
+
+- [x] **Track: EPIC-003 RAG Agent**
+*Link: [./archive/rag_agent_epic003_20260227/](./archive/rag_agent_epic003_20260227/)*
+
+- [x] **Track: EPIC-004 Chart.js Tool (US-008) - Mock chart generation**
+*Link: [./archive/chartjs_tool_epic004_20260227/](./archive/chartjs_tool_epic004_20260227/)*
 
 ---
