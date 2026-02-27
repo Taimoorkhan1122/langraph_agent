@@ -22,6 +22,7 @@ export function generateStubChart(query: string): ChartResult {
         {
           label: `Data for: ${query.slice(0, 50)}`,
           data: [0, 0, 0],
+          backgroundColor: ['#2563EB', '#0EA5E9', '#14B8A6'],
         },
       ],
     },

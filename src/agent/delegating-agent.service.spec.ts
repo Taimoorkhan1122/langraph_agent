@@ -232,17 +232,15 @@ describe('DelegatingAgentService.process() – RAG tool invocation', () => {
   it('starts chart branch before rag resolves for hybrid path', async () => {
     let ragResolved = false;
 
-    const queryMock = jest
-      .fn()
-      .mockImplementation(
-        () =>
-          new Promise<RagResult>((resolve) => {
-            setTimeout(() => {
-              ragResolved = true;
-              resolve(defaultRagResult);
-            }, 25);
-          }),
-      );
+    const queryMock = jest.fn().mockImplementation(
+      () =>
+        new Promise<RagResult>((resolve) => {
+          setTimeout(() => {
+            ragResolved = true;
+            resolve(defaultRagResult);
+          }, 25);
+        }),
+    );
 
     const ragService = {
       query: queryMock,

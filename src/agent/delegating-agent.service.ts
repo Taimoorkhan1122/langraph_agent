@@ -157,9 +157,9 @@ export class DelegatingAgentService {
     }
   }
 
-  private async runChart(
+  private runChart(
     input: ClassificationInput,
-  ): Promise<Partial<ClassificationOutput>> {
+  ): Partial<ClassificationOutput> {
     try {
       const service = this.chartToolService ?? new ChartToolService();
       const serialized = service.generateConfig({
@@ -186,11 +186,11 @@ export class DelegatingAgentService {
     }
   }
 
-  private createBranchError(
+  private createBranchError<Code extends AgentError['code']>(
     source: AgentError['source'],
-    code: AgentError['code'],
+    code: Code,
     message: AgentError['message'],
-  ): AgentError {
+  ): AgentError & { code: Code } {
     return {
       source,
       code,

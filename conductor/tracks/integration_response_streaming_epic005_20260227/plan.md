@@ -34,7 +34,7 @@
 - [x] Task: Refactor - harden error paths and remove duplication (5f35c5d)
     - [x] Consolidate branch error mapping
     - [x] Re-run targeted tests to confirm no behavior regressions
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: TDD Vertical Slice A - Parallel Hybrid Execution (US-009)' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: TDD Vertical Slice A - Parallel Hybrid Execution (US-009)' (Protocol in workflow.md)
 
 ## Phase 3: TDD Vertical Slice B - Streaming Response Format (US-010)
 - [ ] Task: Red - write failing tests for progressive streaming chunks
