@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { ConfigModule } from '@nestjs/config';
 import { AgentModule } from './agent.module';
 import { QueryClassifier } from './query-classifier';
 import { RagService } from './rag.service';
@@ -11,7 +12,7 @@ describe('AgentModule', () => {
   beforeEach(async () => {
     process.env.GEMINI_API_KEY = process.env.GEMINI_API_KEY ?? 'test-key';
     moduleRef = await Test.createTestingModule({
-      imports: [AgentModule],
+      imports: [ConfigModule.forRoot({ isGlobal: true }), AgentModule],
     }).compile();
   });
 
