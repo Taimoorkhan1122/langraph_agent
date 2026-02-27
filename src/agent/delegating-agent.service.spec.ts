@@ -712,3 +712,127 @@ describe('DelegatingAgentService.processStream() – progressive chunks', () => 
     });
   });
 });
+
+describe('DelegatingAgentService – integration-style public entrypoints', () => {
+  const collectChunks = async (
+    stream: AsyncIterable<AgentStreamChunk>,
+  ): Promise<AgentStreamChunk[]> => {
+    const chunks: AgentStreamChunk[] = [];
+
+    for await (const chunk of stream) {
+      chunks.push(chunk);
+    }
+
+    return chunks;
+  };
+
+  it('keeps non-hybrid route behavior stable for direct/rag/chart paths', async () => {
+    const ragResultWithRefs: RagResult = {
+      answer: 'Tenant refund policy answer',
+      sources: [
+        {
+          fileId: 'doc-int-1',
+          question: 'q',
+          answer: 'a',
+          pageNumber: ['4'],
+        },
+      ],
+      references: [
+        {
+          type: 'rag',
+          fileId: 'doc-int-1',
+          index: 1,
+          pages: ['4'],
+        },
+      ],
+    };
+
+    const directService = new DelegatingAgentService(
+      makeClassifier('direct'),
+      makeRagService(ragResultWithRefs).ragService,
+      makeChartToolService().chartToolService as never,
+    );
+    const direct = await directService.process({
+      query: 'hello',
+      tenantName: 'tenant-int',
+    });
+
+    const ragServiceInstance = new DelegatingAgentService(
+      makeClassifier('rag'),
+      makeRagService(ragResultWithRefs).ragService,
+      makeChartToolService().chartToolService as never,
+    );
+    const rag = await ragServiceInstance.process({
+      query: 'refund policy',
+      tenantName: 'tenant-int',
+    });
+
+    const chartService = new DelegatingAgentService(
+      makeClassifier('chart'),
+      makeRagService(ragResultWithRefs).ragService,
+      makeChartToolService().chartToolService as never,
+    );
+    const chart = await chartService.process({
+      query: 'plot revenue trend',
+      tenantName: 'tenant-int',
+    });
+
+    expect(direct.label).toBe('direct');
+    expect(direct.rag).toBeUndefined();
+    expect(direct.chart).toBeUndefined();
+
+    expect(rag.label).toBe('rag');
+    expect(rag.rag?.answer).toBe('Tenant refund policy answer');
+    expect(rag.chart).toBeUndefined();
+
+    expect(chart.label).toBe('chart');
+    expect(chart.chart).toBeDefined();
+    expect(chart.rag).toBeUndefined();
+  });
+
+  it('preserves hybrid full flow consistency between process and processStream', async () => {
+    const ragResultWithRefs: RagResult = {
+      answer: 'Hybrid integration answer',
+      sources: [
+        {
+          fileId: 'doc-int-2',
+          question: 'q',
+          answer: 'a',
+          pageNumber: ['8'],
+        },
+      ],
+      references: [
+        {
+          type: 'rag',
+          fileId: 'doc-int-2',
+          index: 1,
+          pages: ['8'],
+        },
+      ],
+    };
+
+    const service = new DelegatingAgentService(
+      makeClassifier('hybrid'),
+      makeRagService(ragResultWithRefs).ragService,
+      makeChartToolService().chartToolService as never,
+    );
+
+    const request: ClassificationInput = {
+      query: 'hybrid integration test',
+      tenantName: 'tenant-int',
+    };
+
+    const output = await service.process(request);
+    const streamChunks = await collectChunks(service.processStream(request));
+    const finalChunk = streamChunks[streamChunks.length - 1];
+
+    expect(output.label).toBe('hybrid');
+    expect(output.data?.some((item) => item.type === 'rag')).toBe(true);
+    expect(output.data?.some((item) => item.type === 'chart')).toBe(true);
+
+    expect(streamChunks.length).toBeGreaterThan(1);
+    expect(finalChunk.isFinal).toBe(true);
+    expect(finalChunk.data).toEqual(output.data);
+    expect(finalChunk.answer).toBe(output.rag?.answer);
+  });
+});
