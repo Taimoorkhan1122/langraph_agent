@@ -9,5 +9,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [~] **Track: EPIC-003 RAG Agent (US-006, US-007) - PRD and implementation tasks**
+- [x] **Track: EPIC-003 RAG Agent (US-006, US-007) - PRD and implementation tasks**
 *Link: [./tracks/rag_agent_epic003_20260227/](./tracks/rag_agent_epic003_20260227/)*
