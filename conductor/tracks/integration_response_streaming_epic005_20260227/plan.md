@@ -15,7 +15,7 @@
     - [x] List behavior-first tests for streaming progressive emission + final data chunk
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Contracts, Boundaries, and Test Design' (Protocol in workflow.md) (c30dbed)
 
-## Phase 2: TDD Vertical Slice A - Parallel Hybrid Execution (US-009)
+## Phase 2: TDD Vertical Slice A - Parallel Hybrid Execution (US-009) [checkpoint: f7fcefe]
 - [x] Task: Red - write failing test for hybrid query triggering concurrent tool calls (669191c)
     - [x] Assert both tool interfaces are invoked for `hybrid` classification
     - [x] Assert orchestration does not execute strictly sequentially in hybrid path
