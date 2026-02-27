@@ -406,6 +406,86 @@ describe('DelegatingAgentService.process() – error handling', () => {
       code: 'WEAVIATE_ERROR',
     });
   });
+
+  it('preserves rag references and reports chart error when chart fails in hybrid path', async () => {
+    const ragResultWithRefs: RagResult = {
+      answer: 'RAG still works',
+      sources: [
+        {
+          fileId: 'doc-chart-fail',
+          question: 'q',
+          answer: 'a',
+          pageNumber: ['3'],
+        },
+      ],
+      references: [
+        {
+          type: 'rag',
+          fileId: 'doc-chart-fail',
+          index: 1,
+          pages: ['3'],
+        },
+      ],
+    };
+
+    const failingChartToolService = {
+      generateConfig: jest.fn().mockImplementation(() => {
+        throw new Error('Chart renderer failed');
+      }),
+    };
+
+    const service = new DelegatingAgentService(
+      makeClassifier('hybrid'),
+      makeRagService(ragResultWithRefs).ragService,
+      failingChartToolService as never,
+    );
+
+    const output = await service.process(input);
+
+    expect(output.label).toBe('hybrid');
+    expect(output.rag).toEqual(ragResultWithRefs);
+    expect(output.chart).toBeUndefined();
+    expect(output.data).toEqual([
+      {
+        type: 'rag',
+        fileId: 'doc-chart-fail',
+        index: 1,
+        pages: ['3'],
+      },
+    ]);
+    expect(output.errors).toEqual([
+      {
+        source: 'chart',
+        code: 'CHART_TOOL_ERROR',
+        message: 'Chart generation failed',
+      },
+    ]);
+  });
+
+  it('preserves chart output and reports rag error when rag fails in hybrid path', async () => {
+    const failingRag = {
+      query: jest.fn().mockRejectedValue(new Error('Weaviate outage')),
+    } as unknown as RagService;
+
+    const service = new DelegatingAgentService(
+      makeClassifier('hybrid'),
+      failingRag,
+      makeChartToolService().chartToolService as never,
+    );
+
+    const output = await service.process(input);
+
+    expect(output.label).toBe('hybrid');
+    expect(output.chart).toBeDefined();
+    expect(output.data?.some((item) => item.type === 'chart')).toBe(true);
+    expect(output.errors).toEqual([
+      {
+        source: 'rag',
+        code: 'WEAVIATE_ERROR',
+        message: 'RAG retrieval failed',
+      },
+    ]);
+  });
 });
 
 describe('DelegatingAgentService.process() – streaming data compatibility', () => {

@@ -25,12 +25,12 @@
 - [x] Task: Refactor - improve orchestration readability without changing behavior (c408598)
     - [x] Extract merge helper(s) behind clear interface
     - [x] Keep tests green after each small refactor step
-- [ ] Task: Red - write failing test for hybrid single-branch failure handling
-    - [ ] Simulate chart failure with rag success
-    - [ ] Simulate rag failure with chart success
-- [ ] Task: Green - implement partial-failure tolerant aggregation
-    - [ ] Preserve successful branch data
-    - [ ] Emit controlled error context for failed branch
+- [x] Task: Red - write failing test for hybrid single-branch failure handling
+    - [x] Simulate chart failure with rag success
+    - [x] Simulate rag failure with chart success
+- [x] Task: Green - implement partial-failure tolerant aggregation
+    - [x] Preserve successful branch data
+    - [x] Emit controlled error context for failed branch
 - [ ] Task: Refactor - harden error paths and remove duplication
     - [ ] Consolidate branch error mapping
     - [ ] Re-run targeted tests to confirm no behavior regressions
