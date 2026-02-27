@@ -9,7 +9,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [~] **Track: EPIC-004 Chart.js Tool (US-008) - Mock chart generation**
+- [x] **Track: EPIC-004 Chart.js Tool (US-008) - Mock chart generation**
 *Link: [./tracks/chartjs_tool_epic004_20260227/](./tracks/chartjs_tool_epic004_20260227/)*
 
 ---
