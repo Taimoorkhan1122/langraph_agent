@@ -36,7 +36,7 @@
     - [x] Re-run targeted tests to confirm no behavior regressions
 - [x] Task: Conductor - User Manual Verification 'Phase 2: TDD Vertical Slice A - Parallel Hybrid Execution (US-009)' (Protocol in workflow.md)
 
-## Phase 3: TDD Vertical Slice B - Streaming Response Format (US-010)
+## Phase 3: TDD Vertical Slice B - Streaming Response Format (US-010) [checkpoint: 89a05cf]
 - [x] Task: Red - write failing tests for progressive streaming chunks (8404aab)
     - [x] Assert intermediate chunks emit partial `answer`
     - [x] Assert final chunk includes complete `data` array
@@ -55,7 +55,7 @@
 - [x] Task: Refactor - remove duplication and improve naming in formatter (bf83111)
     - [x] Centralize schema guards/validators
     - [x] Re-run focused tests after refactor
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: TDD Vertical Slice B - Streaming Response Format (US-010)' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 3: TDD Vertical Slice B - Streaming Response Format (US-010)' (Protocol in workflow.md) (89a05cf)
 
 ## Phase 4: Integration Quality Gates and Documentation
 - [ ] Task: Add/adjust integration-style tests through public service entry points
