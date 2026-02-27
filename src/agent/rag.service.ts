@@ -24,6 +24,17 @@ interface WeaviateNearTextResponse {
   errors?: Array<{ message: string }>;
 }
 
+interface WeaviateObjectsResponse {
+  objects?: Array<{
+    properties?: {
+      fileId?: string;
+      question?: string;
+      answer?: string;
+      pageNumber?: string[];
+    };
+  }>;
+}
+
 /**
  * Queries Weaviate's Document collection using tenant-scoped retrieval.
  * Returns a `RagResult` with a synthesised answer, source documents,
@@ -55,13 +66,18 @@ export class RagService {
     tenantName: string,
     limit: number = DEFAULT_LIMIT,
   ): Promise<RagResult> {
+    if (!tenantName?.trim()) {
+      throw new Error('Tenant is required for RAG queries.');
+    }
+
     const baseUrl = this.weaviateBaseUrl.replace(/\/$/, '');
+    const escapedQuery = query.replace(/"/g, '\\"');
     const graphqlQuery = {
       query: `{
         Get {
           ${DOCUMENT_COLLECTION_NAME}(
             tenant: "${tenantName}"
-            nearText: { concepts: ["${query.replace(/"/g, '\\"')}"] }
+            nearText: { concepts: ["${escapedQuery}"] }
             limit: ${limit}
           ) {
             fileId
@@ -73,26 +89,12 @@ export class RagService {
       }`,
     };
 
-    const res = await fetch(`${baseUrl}/v1/graphql`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(graphqlQuery),
-    });
-
-    if (!res.ok) {
-      const text = await res.text();
-      throw new Error(`Weaviate GraphQL query failed (${res.status}): ${text}`);
-    }
-
-    const json = (await res.json()) as WeaviateNearTextResponse;
-
-    if (json.errors?.length) {
-      throw new Error(
-        `Weaviate GraphQL errors: ${json.errors.map((e) => e.message).join('; ')}`,
-      );
-    }
-
-    const docs = json.data?.Get?.[DOCUMENT_COLLECTION_NAME] ?? [];
+    const docs = await this.fetchWithSemanticFallback(
+      baseUrl,
+      tenantName,
+      limit,
+      graphqlQuery,
+    );
 
     const sources: RagSource[] = docs.map((d) => ({
       fileId: d.fileId ?? '',
@@ -111,5 +113,89 @@ export class RagService {
     );
 
     return { answer, sources };
+  }
+
+  private async fetchWithSemanticFallback(
+    baseUrl: string,
+    tenantName: string,
+    limit: number,
+    graphqlQuery: { query: string },
+  ): Promise<
+    Array<{
+      fileId?: string;
+      question?: string;
+      answer?: string;
+      pageNumber?: string[];
+    }>
+  > {
+    const res = await fetch(`${baseUrl}/v1/graphql`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(graphqlQuery),
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`Weaviate GraphQL query failed (${res.status}): ${text}`);
+    }
+
+    const json = (await res.json()) as WeaviateNearTextResponse;
+
+    if (!json.errors?.length) {
+      return json.data?.Get?.[DOCUMENT_COLLECTION_NAME] ?? [];
+    }
+
+    const joinedErrors = json.errors.map((e) => e.message).join('; ');
+    if (!this.shouldFallbackToFetchObjects(joinedErrors)) {
+      throw new Error(`Weaviate GraphQL errors: ${joinedErrors}`);
+    }
+
+    this.logger.warn(
+      `nearText unavailable, falling back to fetchObjects for tenant "${tenantName}"`,
+    );
+
+    return this.fetchObjects(baseUrl, tenantName, limit);
+  }
+
+  private shouldFallbackToFetchObjects(errorMessage: string): boolean {
+    const lowered = errorMessage.toLowerCase();
+    return (
+      lowered.includes('neartext is unavailable') ||
+      lowered.includes('unknown argument "neartext"')
+    );
+  }
+
+  private async fetchObjects(
+    baseUrl: string,
+    tenantName: string,
+    limit: number,
+  ): Promise<
+    Array<{
+      fileId?: string;
+      question?: string;
+      answer?: string;
+      pageNumber?: string[];
+    }>
+  > {
+    const params = new URLSearchParams({
+      class: DOCUMENT_COLLECTION_NAME,
+      tenant: tenantName,
+      limit: String(limit),
+    });
+
+    const res = await fetch(`${baseUrl}/v1/objects?${params.toString()}`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`Weaviate fetchObjects failed (${res.status}): ${text}`);
+    }
+
+    const json = (await res.json()) as WeaviateObjectsResponse;
+    const objects = json.objects ?? [];
+
+    return objects.map((item) => item.properties ?? {});
   }
 }
