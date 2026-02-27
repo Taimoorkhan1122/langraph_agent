@@ -42,11 +42,11 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Answer Generation and Reference Provenance' (Protocol in workflow.md) (1a7b8ff)
 
 ## Phase 3: Integration Hardening, Quality Gates, and Documentation
-- [ ] Task: Integrate RAG output contract with delegating-agent/tool boundary
+- [x] Task: Integrate RAG output contract with delegating-agent/tool boundary (6ead35c)
     - [ ] Ensure delegating agent can consume `answer` and `references`
     - [ ] Confirm compatibility with EPIC-005 streaming data shape expectations
     - [ ] Add/update adapter mapping tests at boundary layer
-- [ ] Task: Implement robust error handling paths
+- [~] Task: Implement robust error handling paths
     - [ ] Add explicit handling for Weaviate connection failures
     - [ ] Add partial-result handling where safe to return degraded output
     - [ ] Validate stable error response format for upstream caller
