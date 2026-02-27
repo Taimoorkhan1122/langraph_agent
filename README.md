@@ -59,6 +59,27 @@ $ pnpm run seed
 
 This creates the tenant, inserts three sample document entries (doc-001, doc-002, doc-003), and verifies they are retrievable.
 
+### RAG agent behavior (EPIC-003)
+
+`RagService` provides tenant-scoped retrieval and provenance-aware answers.
+
+- **Tenant required:** calls must include a non-empty tenant name.
+- **Retrieval strategy:** semantic GraphQL retrieval first (`nearText`), then fallback to `fetchObjects` when semantic retrieval is unsupported.
+- **Output shape:** answer text plus grouped, deterministic references.
+
+Example reference object:
+
+```json
+{
+  "type": "rag",
+  "fileId": "doc-001",
+  "index": 1,
+  "pages": ["5", "6"]
+}
+```
+
+Inline references are also appended to answers in natural format, e.g. `1- Pages 5, 6 and 2- Page 12`.
+
 ## Compile and run the project
 
 ```bash
