@@ -22,7 +22,7 @@
 - [x] Task: Green - implement minimal parallel execution orchestration for hybrid path (669191c)
     - [x] Implement concurrent invocation and await-join behavior
     - [x] Aggregate successful results into one response structure
-- [ ] Task: Refactor - improve orchestration readability without changing behavior
+- [~] Task: Refactor - improve orchestration readability without changing behavior
     - [ ] Extract merge helper(s) behind clear interface
     - [ ] Keep tests green after each small refactor step
 - [ ] Task: Red - write failing test for hybrid single-branch failure handling

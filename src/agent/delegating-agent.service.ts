@@ -40,34 +40,17 @@ export class DelegatingAgentService {
       label: await this.classify(input.query),
     };
 
-    let ragResult: Partial<ClassificationOutput> = {};
-    let chartResult: Partial<ClassificationOutput> = {};
-
-    if (output.label === 'hybrid') {
-      [ragResult, chartResult] = await Promise.all([
-        this.runRag(input),
-        this.runChart(input),
-      ]);
-    } else if (output.label === 'rag') {
-      ragResult = await this.runRag(input);
-    } else if (output.label === 'chart') {
-      chartResult = await this.runChart(input);
-    }
+    const { ragResult, chartResult } = await this.executeByLabel(
+      output.label,
+      input,
+    );
 
     output.rag = ragResult.rag;
     output.chart = chartResult.chart;
 
-    const combinedErrors = [...(ragResult.errors ?? []), ...(chartResult.errors ?? [])];
+    const combinedErrors = this.mergeErrors(ragResult, chartResult);
 
-    const data: NonNullable<ClassificationOutput['data']> = [];
-
-    if (output.rag?.references?.length) {
-      data.push(...output.rag.references);
-    }
-
-    if (output.chart !== undefined) {
-      data.push({ type: 'chart', config: output.chart });
-    }
+    const data = this.buildDataReferences(output);
 
     if (data.length > 0) {
       output.data = data;
@@ -78,6 +61,53 @@ export class DelegatingAgentService {
     }
 
     return output;
+  }
+
+  private async executeByLabel(
+    label: ClassificationLabel,
+    input: ClassificationInput,
+  ): Promise<{
+    ragResult: Partial<ClassificationOutput>;
+    chartResult: Partial<ClassificationOutput>;
+  }> {
+    let ragResult: Partial<ClassificationOutput> = {};
+    let chartResult: Partial<ClassificationOutput> = {};
+
+    if (label === 'hybrid') {
+      [ragResult, chartResult] = await Promise.all([
+        this.runRag(input),
+        this.runChart(input),
+      ]);
+    } else if (label === 'rag') {
+      ragResult = await this.runRag(input);
+    } else if (label === 'chart') {
+      chartResult = await this.runChart(input);
+    }
+
+    return { ragResult, chartResult };
+  }
+
+  private buildDataReferences(
+    output: ClassificationOutput,
+  ): NonNullable<ClassificationOutput['data']> {
+    const data: NonNullable<ClassificationOutput['data']> = [];
+
+    if (output.rag?.references?.length) {
+      data.push(...output.rag.references);
+    }
+
+    if (output.chart !== undefined) {
+      data.push({ type: 'chart', config: output.chart });
+    }
+
+    return data;
+  }
+
+  private mergeErrors(
+    ragResult: Partial<ClassificationOutput>,
+    chartResult: Partial<ClassificationOutput>,
+  ): NonNullable<ClassificationOutput['errors']> {
+    return [...(ragResult.errors ?? []), ...(chartResult.errors ?? [])];
   }
 
   private async classify(query: string): Promise<ClassificationLabel> {
