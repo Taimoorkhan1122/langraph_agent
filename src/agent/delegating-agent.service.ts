@@ -10,10 +10,11 @@ import {
   ClassificationInput,
   ClassificationOutput,
   ClassificationLabel,
+  ChartResult,
 } from './agent.interfaces';
 import { QueryClassifier } from './query-classifier';
 import { RagService } from './rag.service';
-import { generateStubChart } from './stub-chart';
+import { ChartToolService } from './chart-tool.service';
 
 const DelegatingAgentState = Annotation.Root({
   query: Annotation<string>,
@@ -37,6 +38,7 @@ export class DelegatingAgentService {
   constructor(
     private readonly classifier: QueryClassifier,
     private readonly ragService: RagService,
+    private readonly chartToolService?: ChartToolService,
   ) {}
 
   /**
@@ -159,6 +161,26 @@ export class DelegatingAgentService {
       return {};
     }
 
-    return { chart: generateStubChart(state.query) };
+    try {
+      const service = this.chartToolService ?? new ChartToolService();
+      const serialized = service.generateConfig({
+        type: 'bar',
+        title: state.query.slice(0, 120),
+      });
+      const chart = JSON.parse(serialized) as ChartResult;
+
+      return { chart };
+    } catch (err) {
+      this.logger.error('Chart tool failed; returning degraded chart result', err);
+      return {
+        errors: [
+          {
+            source: 'chart',
+            code: 'CHART_TOOL_ERROR',
+            message: 'Chart generation failed',
+          },
+        ],
+      };
+    }
   }
 }
