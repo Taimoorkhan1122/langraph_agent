@@ -144,6 +144,62 @@ describe('RagService', () => {
   });
 
   describe('query() – error paths', () => {
+    it('fails with TENANT_REQUIRED semantics when tenantName is missing', async () => {
+      await expect(
+        service.query(QUERY, undefined as unknown as string),
+      ).rejects.toThrow(/tenant/i);
+    });
+
+    it('attempts semantic retrieval first via GraphQL nearText', async () => {
+      const mockFetch = jest.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(makeWeaviateResponse([])),
+      });
+      global.fetch = mockFetch;
+
+      await service.query(QUERY, TENANT);
+
+      const [url] = mockFetch.mock.calls[0] as [string, RequestInit];
+      expect(url).toBe(`${BASE_URL}/v1/graphql`);
+    });
+
+    it('falls back to fetchObjects-style endpoint when semantic retrieval is unavailable', async () => {
+      const mockFetch = jest
+        .fn()
+        .mockResolvedValueOnce({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              errors: [{ message: 'nearText is unavailable for this class' }],
+            }),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              objects: [
+                {
+                  properties: {
+                    fileId: 'doc-xyz',
+                    question: QUERY,
+                    answer: 'Fallback answer.',
+                    pageNumber: ['3'],
+                  },
+                },
+              ],
+            }),
+        });
+      global.fetch = mockFetch;
+
+      const result = await service.query(QUERY, TENANT);
+
+      expect(mockFetch).toHaveBeenCalledTimes(2);
+      const [fallbackUrl] = mockFetch.mock.calls[1] as [string, RequestInit];
+      expect(fallbackUrl).toContain('/v1/objects');
+      expect(result.sources[0].fileId).toBe('doc-xyz');
+      expect(result.answer).toContain('Fallback answer.');
+    });
+
     it('throws when Weaviate returns a non-OK HTTP status', async () => {
       global.fetch = jest.fn().mockResolvedValue({
         ok: false,
