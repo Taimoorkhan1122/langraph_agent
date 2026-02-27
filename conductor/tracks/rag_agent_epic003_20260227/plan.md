@@ -35,11 +35,11 @@
     - [ ] Implement structured `references` output with `{ type:'rag', fileId, index, pages, snippet? }`
     - [ ] Implement empty-result fallback answer with empty references
     - [ ] Re-run targeted tests and confirm pass
-- [~] Task: Refactor reference formatter for determinism and maintainability
+- [x] Task: Refactor reference formatter for determinism and maintainability (46cd9b2)
     - [ ] Extract pure formatter utilities for grouping/indexing logic
     - [ ] Normalize page token handling (string conversion, dedupe)
     - [ ] Re-run tests after refactor
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Answer Generation and Reference Provenance' (Protocol in workflow.md)
+- [~] Task: Conductor - User Manual Verification 'Phase 2: Answer Generation and Reference Provenance' (Protocol in workflow.md)
 
 ## Phase 3: Integration Hardening, Quality Gates, and Documentation
 - [ ] Task: Integrate RAG output contract with delegating-agent/tool boundary
