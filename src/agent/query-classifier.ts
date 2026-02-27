@@ -6,7 +6,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
-import { StringOutputParser } from '@langchain/core/output_parsers';
+import { tool } from '@langchain/core/tools';
+import { z } from 'zod';
 import { ClassificationLabel } from './agent.interfaces';
 
 /** The four deterministic labels the classifier may return. */
@@ -16,6 +17,18 @@ const VALID_LABELS: ReadonlySet<ClassificationLabel> = new Set([
   'direct',
   'hybrid',
 ]);
+
+const CLASSIFICATION_TOOL = tool(
+  ({ label }: { label: ClassificationLabel }) => label,
+  {
+    name: 'set_classification_label',
+    description:
+      'Select exactly one label for the query: chart, rag, direct, or hybrid.',
+    schema: z.object({
+      label: z.enum(['chart', 'rag', 'direct', 'hybrid']),
+    }),
+  },
+);
 
 const CLASSIFICATION_PROMPT = ChatPromptTemplate.fromMessages([
   [
@@ -50,11 +63,23 @@ export class QueryClassifier {
    * @returns A `ClassificationLabel` promise.
    */
   async classify(query: string): Promise<ClassificationLabel> {
-    const chain = CLASSIFICATION_PROMPT.pipe(this.llm).pipe(
-      new StringOutputParser(),
-    );
+    const modelWithBindTools = this.llm as BaseChatModel & {
+      bindTools?: (tools: unknown[]) => unknown;
+    };
 
-    const raw = await chain.invoke({ query });
+    const model =
+      typeof modelWithBindTools.bindTools === 'function'
+        ? modelWithBindTools.bindTools([CLASSIFICATION_TOOL])
+        : this.llm;
+
+    const response = await CLASSIFICATION_PROMPT.pipe(model).invoke({ query });
+
+    const toolLabel = this.extractToolLabel(response);
+    if (toolLabel !== undefined) {
+      return toolLabel;
+    }
+
+    const raw = this.extractText(response);
     const label = raw.trim().toLowerCase() as ClassificationLabel;
 
     if (VALID_LABELS.has(label)) {
@@ -65,5 +90,71 @@ export class QueryClassifier {
       `LLM returned unexpected label "${raw}"; falling back to "direct"`,
     );
     return 'direct';
+  }
+
+  private extractToolLabel(response: unknown): ClassificationLabel | undefined {
+    if (!response || typeof response !== 'object') {
+      return undefined;
+    }
+
+    const toolCalls = (
+      response as {
+        tool_calls?: Array<{ args?: { label?: string } }>;
+      }
+    ).tool_calls;
+
+    if (!Array.isArray(toolCalls)) {
+      return undefined;
+    }
+
+    for (const call of toolCalls) {
+      const label = call.args?.label?.trim().toLowerCase() as
+        | ClassificationLabel
+        | undefined;
+      if (label !== undefined && VALID_LABELS.has(label)) {
+        return label;
+      }
+    }
+
+    return undefined;
+  }
+
+  private extractText(response: unknown): string {
+    if (typeof response === 'string') {
+      return response;
+    }
+
+    if (!response || typeof response !== 'object') {
+      return '';
+    }
+
+    const content = (response as { content?: unknown }).content;
+    if (typeof content === 'string') {
+      return content;
+    }
+
+    if (!Array.isArray(content)) {
+      return '';
+    }
+
+    return content
+      .map((item) => {
+        if (typeof item === 'string') {
+          return item;
+        }
+
+        if (
+          item &&
+          typeof item === 'object' &&
+          'text' in item &&
+          typeof (item as { text: unknown }).text === 'string'
+        ) {
+          return (item as { text: string }).text;
+        }
+
+        return '';
+      })
+      .join(' ')
+      .trim();
   }
 }

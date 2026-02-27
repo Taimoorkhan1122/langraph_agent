@@ -5,6 +5,7 @@
  */
 
 import { Injectable, Logger } from '@nestjs/common';
+import { Annotation, END, START, StateGraph } from '@langchain/langgraph';
 import {
   ClassificationInput,
   ClassificationOutput,
@@ -13,6 +14,16 @@ import {
 import { QueryClassifier } from './query-classifier';
 import { RagService } from './rag.service';
 import { generateStubChart } from './stub-chart';
+
+const DelegatingAgentState = Annotation.Root({
+  query: Annotation<string>,
+  tenantName: Annotation<string | undefined>,
+  label: Annotation<ClassificationLabel | undefined>,
+  rag: Annotation<ClassificationOutput['rag'] | undefined>,
+  chart: Annotation<ClassificationOutput['chart'] | undefined>,
+});
+
+type DelegatingAgentStateType = typeof DelegatingAgentState.State;
 
 /**
  * Orchestrates the full delegating-agent pipeline:
@@ -34,38 +45,81 @@ export class DelegatingAgentService {
    * @returns A `ClassificationOutput` with label and populated tool outputs.
    */
   async process(input: ClassificationInput): Promise<ClassificationOutput> {
-    const { query, tenantName } = input;
+    const graph = new StateGraph(DelegatingAgentState)
+      .addNode('classify', (state: DelegatingAgentStateType) =>
+        this.classifyNode(state),
+      )
+      .addNode('runRag', (state: DelegatingAgentStateType) =>
+        this.runRagNode(state),
+      )
+      .addNode('runChart', (state: DelegatingAgentStateType) =>
+        this.runChartNode(state),
+      )
+      .addEdge(START, 'classify')
+      .addEdge('classify', 'runRag')
+      .addEdge('runRag', 'runChart')
+      .addEdge('runChart', END)
+      .compile();
 
-    // ----- 1. Classify -------------------------------------------------------
-    let label: ClassificationLabel;
+    const state = await graph.invoke({
+      query: input.query,
+      tenantName: input.tenantName,
+    });
+
+    const output: ClassificationOutput = {
+      label: state.label ?? 'direct',
+    };
+
+    if (state.rag !== undefined) {
+      output.rag = state.rag;
+    }
+
+    if (state.chart !== undefined) {
+      output.chart = state.chart;
+    }
+
+    return output;
+  }
+
+  private async classifyNode(
+    state: DelegatingAgentStateType,
+  ): Promise<Partial<DelegatingAgentStateType>> {
     try {
-      label = await this.classifier.classify(query);
+      const label = await this.classifier.classify(state.query);
       this.logger.log(`Query classified as "${label}"`);
+      return { label };
     } catch (err) {
       this.logger.error('LLM classifier failed; falling back to "direct"', err);
       return { label: 'direct' };
     }
+  }
 
-    const output: ClassificationOutput = { label };
-
-    // ----- 2. RAG tool (rag / hybrid) ----------------------------------------
-    if (label === 'rag' || label === 'hybrid') {
-      try {
-        output.rag = await this.ragService.query(
-          query,
-          tenantName ?? 'default',
-        );
-      } catch (err) {
-        this.logger.error('RAG service failed; omitting rag result', err);
-        // label is still accurate; rag payload is omitted (safe degradation)
-      }
+  private async runRagNode(
+    state: DelegatingAgentStateType,
+  ): Promise<Partial<DelegatingAgentStateType>> {
+    if (state.label !== 'rag' && state.label !== 'hybrid') {
+      return {};
     }
 
-    // ----- 3. Stub chart (chart / hybrid) ------------------------------------
-    if (label === 'chart' || label === 'hybrid') {
-      output.chart = generateStubChart(query);
+    try {
+      const rag = await this.ragService.query(
+        state.query,
+        state.tenantName ?? 'default',
+      );
+      return { rag };
+    } catch (err) {
+      this.logger.error('RAG service failed; omitting rag result', err);
+      return {};
+    }
+  }
+
+  private runChartNode(
+    state: DelegatingAgentStateType,
+  ): Partial<DelegatingAgentStateType> {
+    if (state.label !== 'chart' && state.label !== 'hybrid') {
+      return {};
     }
 
-    return output;
+    return { chart: generateStubChart(state.query) };
   }
 }
