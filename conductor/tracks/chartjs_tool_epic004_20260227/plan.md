@@ -1,7 +1,7 @@
 # Implementation Plan: EPIC-004 Chart.js Tool (US-008)
 
 ## Phase 1: Tool Contract & Scaffolding
-- [ ] Task: Define Chart.js tool input/output contracts
+- [x] Task: Define Chart.js tool input/output contracts (7bac554)
     - [ ] Define chart input schema supporting `bar`, `line`, `pie`, `doughnut`
     - [ ] Define output contract as serialized Chart.js config JSON string
     - [ ] Define structured error model for invalid input
