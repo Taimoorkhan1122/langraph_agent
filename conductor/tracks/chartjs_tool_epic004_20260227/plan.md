@@ -31,12 +31,12 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 2: TDD - Mock Configuration Generator' (Protocol in workflow.md) (7ce7d80)
 
 ## Phase 3: TDD - Validation, Registration & Quality Gates
-- [ ] Task: Write failing tests for invalid input and registration behavior (Red)
+- [x] Task: Write failing tests for invalid input and registration behavior (Red) (ae58dd5)
     - [ ] Test unsupported chart type error
     - [ ] Test malformed payload error handling
     - [ ] Test tool callable registration path in delegating agent context
     - [ ] Run targeted tests and confirm failures
-- [ ] Task: Implement structured validation and error handling (Green)
+- [~] Task: Implement structured validation and error handling (Green)
     - [ ] Return descriptive structured errors for invalid inputs
     - [ ] Keep successful path unchanged for valid payloads
     - [ ] Ensure registration path stays callable
