@@ -12,6 +12,7 @@ import {
   ClassificationInput,
   RagResult,
   ChartResult,
+  AgentStreamChunk,
 } from './agent.interfaces';
 
 // ---------------------------------------------------------------------------
@@ -573,5 +574,60 @@ describe('DelegatingAgentService.process() – streaming data compatibility', ()
     expect(output.data).toHaveLength(2);
     expect(output.data?.[0]).toMatchObject({ type: 'rag', fileId: 'doc-2' });
     expect(output.data?.[1]).toMatchObject({ type: 'chart' });
+  });
+});
+
+describe('DelegatingAgentService.processStream() – progressive chunks', () => {
+  const input: ClassificationInput = {
+    query: 'stream hybrid response',
+    tenantName: 'tenant-streaming',
+  };
+
+  const collectChunks = async (
+    stream: AsyncIterable<AgentStreamChunk>,
+  ): Promise<AgentStreamChunk[]> => {
+    const chunks: AgentStreamChunk[] = [];
+
+    for await (const chunk of stream) {
+      chunks.push(chunk);
+    }
+
+    return chunks;
+  };
+
+  it('emits intermediate chunk(s) with partial answer before final chunk', async () => {
+    const service = new DelegatingAgentService(
+      makeClassifier('hybrid'),
+      makeRagService().ragService,
+      makeChartToolService().chartToolService as never,
+    );
+
+    const streamApi = service as unknown as {
+      processStream: (payload: ClassificationInput) => AsyncIterable<AgentStreamChunk>;
+    };
+
+    const chunks = await collectChunks(streamApi.processStream(input));
+
+    expect(chunks.length).toBeGreaterThan(1);
+    expect(chunks[0].answer.length).toBeGreaterThan(0);
+    expect(chunks[0].isFinal).toBe(false);
+  });
+
+  it('emits a final chunk containing complete data payload', async () => {
+    const service = new DelegatingAgentService(
+      makeClassifier('hybrid'),
+      makeRagService().ragService,
+      makeChartToolService().chartToolService as never,
+    );
+
+    const streamApi = service as unknown as {
+      processStream: (payload: ClassificationInput) => AsyncIterable<AgentStreamChunk>;
+    };
+
+    const chunks = await collectChunks(streamApi.processStream(input));
+    const finalChunk = chunks[chunks.length - 1];
+
+    expect(finalChunk.isFinal).toBe(true);
+    expect(finalChunk.data.length).toBeGreaterThan(0);
   });
 });
