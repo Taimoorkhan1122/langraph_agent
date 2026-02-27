@@ -20,11 +20,11 @@
     - [ ] Add tests for `line` output shape and required fields
     - [ ] Add tests for `pie` and `doughnut` output shape and required fields
     - [ ] Run targeted tests and confirm failures
-- [ ] Task: Implement mock chart configuration generator (Green)
+- [x] Task: Implement mock chart configuration generator (Green) (1174f87)
     - [ ] Implement deterministic label and dataset generation
     - [ ] Ensure output is serialized JSON string
     - [ ] Ensure config parseability and compatibility with Chart.js structure
-- [ ] Task: Refactor implementation and tests safely
+- [~] Task: Refactor implementation and tests safely
     - [ ] Remove duplication in config builders
     - [ ] Preserve deterministic outputs and public behavior
     - [ ] Re-run tests to confirm pass state
