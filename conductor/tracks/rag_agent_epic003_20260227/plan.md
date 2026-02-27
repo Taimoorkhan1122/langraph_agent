@@ -10,7 +10,7 @@
     - [ ] Add unit tests for semantic retrieval path selection
     - [ ] Add unit tests for semantic-to-fetch fallback behavior
     - [ ] Run tests and confirm failures for new scenarios
-- [ ] Task: Implement retrieval orchestration to pass tests (Green)
+- [x] Task: Implement retrieval orchestration to pass tests (Green) (476bb17)
     - [ ] Implement tenant presence validation in RAG service entrypoint
     - [ ] Implement semantic query attempt (`nearText`/hybrid) when available
     - [ ] Implement fallback to `fetchObjects` on capability/config failure
