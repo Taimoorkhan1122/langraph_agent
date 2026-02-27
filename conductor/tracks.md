@@ -8,6 +8,3 @@ This file tracks all major tracks for the project. Each track has its own detail
 *Link: [./tracks/delegating_agent_epic002_20260227/](./tracks/delegating_agent_epic002_20260227/)*
 
 ---
-
-- [x] **Track: EPIC-003 RAG Agent (US-006, US-007) - PRD and implementation tasks**
-*Link: [./tracks/rag_agent_epic003_20260227/](./tracks/rag_agent_epic003_20260227/)*
