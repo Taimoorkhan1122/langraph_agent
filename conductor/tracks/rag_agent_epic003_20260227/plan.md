@@ -1,6 +1,6 @@
 # Implementation Plan — EPIC-003 RAG Agent (US-006, US-007)
 
-## Phase 1: Tenant-Scoped Retrieval Foundation
+## Phase 1: Tenant-Scoped Retrieval Foundation [checkpoint: 2a73fc2]
 - [x] Task: Define RAG input/output contracts and tenant validation behavior (7b309d7)
     - [ ] Add/confirm TypeScript interfaces for RAG request, retrieval result, and error result
     - [ ] Define required tenant input contract and missing-tenant error shape
@@ -20,7 +20,7 @@
     - [ ] Remove duplication and isolate query strategy decision logic
     - [ ] Improve mocks/fixtures for Weaviate client behavior
     - [ ] Re-run tests after refactor
-- [~] Task: Conductor - User Manual Verification 'Phase 1: Tenant-Scoped Retrieval Foundation' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Tenant-Scoped Retrieval Foundation' (Protocol in workflow.md) (2a73fc2)
 
 ## Phase 2: Answer Generation and Reference Provenance
 - [ ] Task: Write failing tests for answer composition and reference formatting (Red)
