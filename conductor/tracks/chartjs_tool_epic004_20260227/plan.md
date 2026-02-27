@@ -40,10 +40,10 @@
     - [ ] Return descriptive structured errors for invalid inputs
     - [ ] Keep successful path unchanged for valid payloads
     - [ ] Ensure registration path stays callable
-- [~] Task: Execute quality gates and stabilize
+- [x] Task: Execute quality gates and stabilize (e74d5d0)
     - [ ] Run `pnpm run lint`
     - [ ] Run `CI=true pnpm test`
     - [ ] Run `CI=true pnpm run test:cov` and confirm coverage target for changed modules
-- [ ] Task: Update docs where needed
+- [x] Task: Update docs where needed (no changes required)
     - [ ] Update relevant conductor/docs references for EPIC-004 track
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: TDD - Validation, Registration & Quality Gates' (Protocol in workflow.md)
+- [~] Task: Conductor - User Manual Verification 'Phase 3: TDD - Validation, Registration & Quality Gates' (Protocol in workflow.md)
