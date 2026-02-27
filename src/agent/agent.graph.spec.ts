@@ -9,15 +9,16 @@ import type { RagService } from './rag.service';
 import type { ChartToolService } from './chart-tool.service';
 
 const makeClassifier = (label: 'chart' | 'rag' | 'direct' | 'hybrid') =>
-  ({ classify: async () => label }) as unknown as QueryClassifier;
+  ({ classify: () => Promise.resolve(label) }) as unknown as QueryClassifier;
 
 const makeRagService = () =>
   ({
-    query: async () => ({
-      answer: 'RAG answer',
-      sources: [],
-      references: [],
-    }),
+    query: () =>
+      Promise.resolve({
+        answer: 'RAG answer',
+        sources: [],
+        references: [],
+      }),
   }) as unknown as RagService;
 
 const makeChartService = () =>

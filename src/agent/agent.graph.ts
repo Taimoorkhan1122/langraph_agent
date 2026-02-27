@@ -144,7 +144,7 @@ export function createDelegatingAgentGraph(
     }
   }
 
-  function directNode(_state: AgentState): Partial<AgentState> {
+  function directNode(): Partial<AgentState> {
     return {};
   }
 
@@ -178,7 +178,7 @@ export function createDelegatingAgentGraph(
           };
         }
       })(),
-      (async () => {
+      Promise.resolve().then(() => {
         try {
           const serialized = chartService.generateConfig({
             type: 'bar',
@@ -195,7 +195,7 @@ export function createDelegatingAgentGraph(
           );
           return { errors: [error] };
         }
-      })(),
+      }),
     ]);
     return {
       rag: ragUpdate.rag,

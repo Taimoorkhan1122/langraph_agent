@@ -50,6 +50,7 @@ describe('AgentController', () => {
       };
       (delegatingAgent.processStream as jest.Mock).mockImplementation(
         async function* () {
+          await Promise.resolve();
           yield chunk1;
           yield chunk2;
         },
@@ -61,32 +62,40 @@ describe('AgentController', () => {
         res,
       );
 
-      expect(res.setHeader).toHaveBeenCalledWith(
+      const setHeaderMock = (res as unknown as { setHeader: jest.Mock })
+        .setHeader;
+      const flushHeadersMock = (res as unknown as { flushHeaders: jest.Mock })
+        .flushHeaders;
+      const writeMock = (res as unknown as { write: jest.Mock }).write;
+      const endMock = (res as unknown as { end: jest.Mock }).end;
+
+      expect(setHeaderMock).toHaveBeenCalledWith(
         'Content-Type',
         'text/event-stream',
       );
-      expect(res.setHeader).toHaveBeenCalledWith('Cache-Control', 'no-cache');
-      expect(res.setHeader).toHaveBeenCalledWith('Connection', 'keep-alive');
-      expect(res.flushHeaders).toHaveBeenCalled();
-      expect(delegatingAgent.processStream).toHaveBeenCalledWith({
+      expect(setHeaderMock).toHaveBeenCalledWith('Cache-Control', 'no-cache');
+      expect(setHeaderMock).toHaveBeenCalledWith('Connection', 'keep-alive');
+      expect(flushHeadersMock).toHaveBeenCalled();
+      expect(delegatingAgent.processStream as jest.Mock).toHaveBeenCalledWith({
         query: 'test query',
         tenantName: 'tenant-1',
       });
-      expect(res.write).toHaveBeenCalledTimes(2);
-      expect(res.write).toHaveBeenNthCalledWith(
+      expect(writeMock).toHaveBeenCalledTimes(2);
+      expect(writeMock).toHaveBeenNthCalledWith(
         1,
         `data: ${JSON.stringify(chunk1)}\n\n`,
       );
-      expect(res.write).toHaveBeenNthCalledWith(
+      expect(writeMock).toHaveBeenNthCalledWith(
         2,
         `data: ${JSON.stringify(chunk2)}\n\n`,
       );
-      expect(res.end).toHaveBeenCalled();
+      expect(endMock).toHaveBeenCalled();
     });
 
     it('forwards query only when tenantName is omitted', async () => {
       (delegatingAgent.processStream as jest.Mock).mockImplementation(
         async function* () {
+          await Promise.resolve();
           yield { answer: 'ok', data: [], isFinal: true };
         },
       );
@@ -94,28 +103,30 @@ describe('AgentController', () => {
       const res = mockRes();
       await controller.stream({ query: 'hello' }, res);
 
-      expect(delegatingAgent.processStream).toHaveBeenCalledWith({
+      expect(delegatingAgent.processStream as jest.Mock).toHaveBeenCalledWith({
         query: 'hello',
         tenantName: undefined,
       });
-      expect(res.end).toHaveBeenCalled();
+      expect((res as unknown as { end: jest.Mock }).end).toHaveBeenCalled();
     });
 
     it('sets status 500 and writes error event when processStream throws', async () => {
-      (delegatingAgent.processStream as jest.Mock).mockImplementation(
-        async function* () {
-          throw new Error('Agent failed');
-        },
-      );
+      (delegatingAgent.processStream as jest.Mock).mockImplementation(() => ({
+        [Symbol.asyncIterator]: () => ({
+          next: () => Promise.reject(new Error('Agent failed')),
+        }),
+      }));
 
       const res = mockRes();
       await controller.stream({ query: 'fail', tenantName: 't' }, res);
 
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.write).toHaveBeenCalledWith(
-        expect.stringContaining('"error":"Agent failed"'),
-      );
-      expect(res.end).toHaveBeenCalled();
+      expect(
+        (res as unknown as { status: jest.Mock }).status,
+      ).toHaveBeenCalledWith(500);
+      expect(
+        (res as unknown as { write: jest.Mock }).write,
+      ).toHaveBeenCalledWith(expect.stringContaining('"error":"Agent failed"'));
+      expect((res as unknown as { end: jest.Mock }).end).toHaveBeenCalled();
     });
   });
 });

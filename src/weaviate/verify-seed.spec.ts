@@ -4,16 +4,36 @@ import {
   verifySampleData,
   type DocumentObject,
 } from './verify-seed';
+import { createWeaviateClient } from './client';
 
 function makeIterator<T>(items: T[]) {
   return {
-    async *[Symbol.asyncIterator]() {
-      for (const item of items) {
-        yield item;
-      }
+    [Symbol.asyncIterator]: () => {
+      let index = 0;
+      return {
+        next: () =>
+          Promise.resolve(
+            index < items.length
+              ? { value: items[index++], done: false as const }
+              : { value: undefined, done: true as const },
+          ),
+      };
     },
   };
 }
+
+const createWeaviateClientMock = jest.mocked(createWeaviateClient);
+
+type VerifyClientLike = {
+  collections: {
+    get: () => {
+      withTenant: () => {
+        iterator: () => AsyncIterable<{ properties: DocumentObject }>;
+      };
+    };
+  };
+  close?: () => Promise<void>;
+};
 
 jest.mock('./client', () => {
   const actual = jest.requireActual<typeof import('./client')>('./client');
@@ -47,10 +67,12 @@ describe('Weaviate verify-seed (US-003)', () => {
             }),
           }),
         },
-      } as any;
+      } as unknown as VerifyClientLike;
 
       const result = await fetchDocumentObjectsWithClient(
-        client,
+        client as unknown as Parameters<
+          typeof fetchDocumentObjectsWithClient
+        >[0],
         'sample-tenant',
         10,
       );
@@ -69,8 +91,7 @@ describe('Weaviate verify-seed (US-003)', () => {
           pageNumber: ['1'],
         },
       ];
-      const { createWeaviateClient } = require('./client');
-      (createWeaviateClient as jest.Mock).mockResolvedValue({
+      createWeaviateClientMock.mockResolvedValue({
         collections: {
           get: () => ({
             withTenant: () => ({
@@ -80,12 +101,12 @@ describe('Weaviate verify-seed (US-003)', () => {
           }),
         },
         close: jest.fn().mockResolvedValue(undefined),
-      });
+      } as unknown as Awaited<ReturnType<typeof createWeaviateClient>>);
 
       const result = await fetchDocumentObjects('http://localhost:8080');
       expect(result).toHaveLength(1);
       expect(result[0]).toEqual(props[0]);
-      expect(createWeaviateClient).toHaveBeenCalledWith(
+      expect(createWeaviateClientMock).toHaveBeenCalledWith(
         'http://localhost:8080',
       );
     });
@@ -98,8 +119,7 @@ describe('Weaviate verify-seed (US-003)', () => {
         { fileId: 'b', question: 'q', answer: 'a', pageNumber: [] },
         { fileId: 'c', question: 'q', answer: 'a', pageNumber: [] },
       ];
-      const { createWeaviateClient } = require('./client');
-      (createWeaviateClient as jest.Mock).mockResolvedValue({
+      createWeaviateClientMock.mockResolvedValue({
         collections: {
           get: () => ({
             withTenant: () => ({
@@ -109,7 +129,7 @@ describe('Weaviate verify-seed (US-003)', () => {
           }),
         },
         close: jest.fn().mockResolvedValue(undefined),
-      });
+      } as unknown as Awaited<ReturnType<typeof createWeaviateClient>>);
 
       const ok = await verifySampleData(
         'http://localhost:8080',
@@ -130,17 +150,17 @@ describe('Weaviate verify-seed (US-003)', () => {
           },
         },
       ];
-      const { createWeaviateClient } = require('./client');
-      (createWeaviateClient as jest.Mock).mockResolvedValue({
+      createWeaviateClientMock.mockResolvedValue({
         collections: {
           get: () => ({
             withTenant: () => ({
-              iterator: () => makeIterator(one),
+              iterator: () =>
+                makeIterator(one as Array<{ properties: DocumentObject }>),
             }),
           }),
         },
         close: jest.fn().mockResolvedValue(undefined),
-      });
+      } as unknown as Awaited<ReturnType<typeof createWeaviateClient>>);
 
       await expect(
         verifySampleData('http://localhost:8080', 'sample-tenant', 3),
@@ -153,17 +173,21 @@ describe('Weaviate verify-seed (US-003)', () => {
           properties: { fileId: 'a', question: 'q', answer: 'a' },
         },
       ];
-      const { createWeaviateClient } = require('./client');
-      (createWeaviateClient as jest.Mock).mockResolvedValue({
+      createWeaviateClientMock.mockResolvedValue({
         collections: {
           get: () => ({
             withTenant: () => ({
-              iterator: () => makeIterator(one),
+              iterator: () =>
+                makeIterator(
+                  one as Array<{
+                    properties: Omit<DocumentObject, 'pageNumber'>;
+                  }>,
+                ),
             }),
           }),
         },
         close: jest.fn().mockResolvedValue(undefined),
-      });
+      } as unknown as Awaited<ReturnType<typeof createWeaviateClient>>);
 
       await expect(
         verifySampleData('http://localhost:8080', 'sample-tenant', 1),

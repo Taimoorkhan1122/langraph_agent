@@ -25,7 +25,12 @@ import { createDelegatingAgentGraph } from './agent.graph';
 @Injectable()
 export class DelegatingAgentService {
   private readonly logger = new Logger(DelegatingAgentService.name);
-  private readonly graph;
+  private readonly graph: {
+    invoke: (input: {
+      query: string;
+      tenantName: string;
+    }) => Promise<Partial<ClassificationOutput>>;
+  };
 
   constructor(
     private readonly classifier: QueryClassifier,

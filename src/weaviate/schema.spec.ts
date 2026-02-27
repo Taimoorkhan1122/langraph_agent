@@ -4,10 +4,25 @@ import {
   createDocumentSchema,
   createDocumentSchemaWithClient,
 } from './schema';
+import { createWeaviateClient } from './client';
 
 const mockExists = jest.fn();
 const mockCreate = jest.fn();
 const mockClose = jest.fn();
+const createWeaviateClientMock = jest.mocked(createWeaviateClient);
+
+type SchemaClientLike = {
+  collections: {
+    exists: typeof mockExists;
+    create: typeof mockCreate;
+  };
+};
+
+type DocumentCollectionConfig = {
+  name: string;
+  multiTenancy: { enabled: boolean };
+  properties: unknown[];
+};
 
 jest.mock('./client', () => {
   const actual = jest.requireActual<typeof import('./client')>('./client');
@@ -76,13 +91,17 @@ describe('Weaviate Document schema (US-002)', () => {
       mockExists.mockResolvedValue(false);
       const client = {
         collections: { exists: mockExists, create: mockCreate },
-      } as any;
+      } as unknown as SchemaClientLike;
 
-      await createDocumentSchemaWithClient(client);
+      await createDocumentSchemaWithClient(
+        client as unknown as Parameters<
+          typeof createDocumentSchemaWithClient
+        >[0],
+      );
 
       expect(mockExists).toHaveBeenCalledWith('Document');
       expect(mockCreate).toHaveBeenCalledTimes(1);
-      const config = mockCreate.mock.calls[0][0];
+      const [config] = mockCreate.mock.calls[0] as [DocumentCollectionConfig];
       expect(config.name).toBe('Document');
       expect(config.multiTenancy).toEqual({ enabled: true });
       expect(config.properties).toHaveLength(4);
@@ -92,9 +111,13 @@ describe('Weaviate Document schema (US-002)', () => {
       mockExists.mockResolvedValue(true);
       const client = {
         collections: { exists: mockExists, create: mockCreate },
-      } as any;
+      } as unknown as SchemaClientLike;
 
-      await createDocumentSchemaWithClient(client);
+      await createDocumentSchemaWithClient(
+        client as unknown as Parameters<
+          typeof createDocumentSchemaWithClient
+        >[0],
+      );
 
       expect(mockExists).toHaveBeenCalledWith('Document');
       expect(mockCreate).not.toHaveBeenCalled();
@@ -105,10 +128,14 @@ describe('Weaviate Document schema (US-002)', () => {
       mockCreate.mockRejectedValue(new Error('collection already exists'));
       const client = {
         collections: { exists: mockExists, create: mockCreate },
-      } as any;
+      } as unknown as SchemaClientLike;
 
       await expect(
-        createDocumentSchemaWithClient(client),
+        createDocumentSchemaWithClient(
+          client as unknown as Parameters<
+            typeof createDocumentSchemaWithClient
+          >[0],
+        ),
       ).resolves.toBeUndefined();
     });
 
@@ -117,20 +144,23 @@ describe('Weaviate Document schema (US-002)', () => {
       mockCreate.mockRejectedValue(new Error('Bad config'));
       const client = {
         collections: { exists: mockExists, create: mockCreate },
-      } as any;
+      } as unknown as SchemaClientLike;
 
-      await expect(createDocumentSchemaWithClient(client)).rejects.toThrow(
-        /Weaviate schema create failed/,
-      );
+      await expect(
+        createDocumentSchemaWithClient(
+          client as unknown as Parameters<
+            typeof createDocumentSchemaWithClient
+          >[0],
+        ),
+      ).rejects.toThrow(/Weaviate schema create failed/);
     });
   });
 
   describe('createDocumentSchema', () => {
     it('should create client, call createDocumentSchemaWithClient, and close', async () => {
-      const { createWeaviateClient } = require('./client');
       await createDocumentSchema('http://localhost:8080');
 
-      expect(createWeaviateClient).toHaveBeenCalledWith(
+      expect(createWeaviateClientMock).toHaveBeenCalledWith(
         'http://localhost:8080',
       );
       expect(mockCreate).toHaveBeenCalled();
