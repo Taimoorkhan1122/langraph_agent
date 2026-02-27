@@ -5,6 +5,27 @@ import {
   ChartType,
 } from './chart-tool.service';
 
+type ParsedChartConfig = {
+  type: string;
+  data: {
+    labels: string[];
+    datasets: Array<{
+      label: string;
+      data: number[];
+      backgroundColor: string[];
+    }>;
+  };
+  options: {
+    responsive?: boolean;
+    plugins?: {
+      title?: { display: boolean; text: string };
+    };
+  };
+};
+
+const parseChartConfig = (raw: string): ParsedChartConfig =>
+  JSON.parse(raw) as ParsedChartConfig;
+
 describe('ChartToolService contracts', () => {
   let service: ChartToolService;
 
@@ -44,18 +65,7 @@ describe('ChartToolService contracts', () => {
 
     expect(typeof output).toBe('string');
 
-    const parsed = JSON.parse(output) as {
-      type: string;
-      data: {
-        labels: string[];
-        datasets: Array<{
-          label: string;
-          data: number[];
-          backgroundColor: string[];
-        }>;
-      };
-      options: Record<string, unknown>;
-    };
+    const parsed = parseChartConfig(output);
 
     expect(parsed.type).toBe('bar');
     expect(Array.isArray(parsed.data.labels)).toBe(true);
@@ -71,38 +81,20 @@ describe('ChartToolService contracts', () => {
         title: `${type} title`,
       });
 
-      const parsed = JSON.parse(output) as {
-        type: string;
-        data: {
-          labels: string[];
-          datasets: Array<{
-            label: string;
-            data: number[];
-            backgroundColor: string[];
-          }>;
-        };
-        options: {
-          responsive: boolean;
-          plugins: {
-            title: { display: boolean; text: string };
-          };
-        };
-      };
+      const parsed = parseChartConfig(output);
 
       expect(parsed.type).toBe(type);
       expect(parsed.data.labels.length).toBeGreaterThan(0);
       expect(parsed.data.datasets[0].data.length).toBeGreaterThan(0);
       expect(parsed.data.datasets[0].backgroundColor.length).toBeGreaterThan(0);
       expect(parsed.options.responsive).toBe(true);
-      expect(parsed.options.plugins.title.text).toBe(`${type} title`);
+      expect(parsed.options.plugins?.title?.text).toBe(`${type} title`);
     },
   );
 
   it('uses deterministic, type-specific labels and values for bar charts', () => {
     const output = service.generateConfig({ type: 'bar', title: 'bar title' });
-    const parsed = JSON.parse(output) as {
-      data: { labels: string[]; datasets: Array<{ data: number[] }> };
-    };
+    const parsed = parseChartConfig(output);
 
     expect(parsed.data.labels).toEqual(['Q1', 'Q2', 'Q3', 'Q4']);
     expect(parsed.data.datasets[0].data).toEqual([42, 55, 38, 61]);
@@ -110,9 +102,7 @@ describe('ChartToolService contracts', () => {
 
   it('uses deterministic, type-specific labels and values for pie charts', () => {
     const output = service.generateConfig({ type: 'pie', title: 'pie title' });
-    const parsed = JSON.parse(output) as {
-      data: { labels: string[]; datasets: Array<{ data: number[] }> };
-    };
+    const parsed = parseChartConfig(output);
 
     expect(parsed.data.labels).toEqual([
       'Product A',
